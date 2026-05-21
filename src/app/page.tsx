@@ -2,12 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -37,6 +32,7 @@ export default function LoginPage() {
     }
 
     alert('Login successful')
+
     router.push('/home')
   }
 
@@ -75,11 +71,9 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white p-3 rounded-lg"
         >
-          {loading
-            ? 'Logging in...'
-            : 'Login'}
+          {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
     </div>
