@@ -1,14 +1,9 @@
-import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-
-export default async function RootPage() {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get(name: string) { return cookieStore.get(name)?.value } } }
+export default function RootPage() {
+  return (
+    <div style={{ padding: '40px' }}>
+      <h1>TTSGP Booking System 🚀</h1>
+      <p>Website deployment successful.</p>
+      <a href="/login">Go to Login</a>
+    </div>
   )
-  const { data } = await supabase.auth.getSession()
-  redirect(data.session ? '/home' : '/login')
 }
