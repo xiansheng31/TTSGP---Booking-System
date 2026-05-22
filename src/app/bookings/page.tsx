@@ -1,73 +1,90 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import RoomCard from '@/components/RoomCard'
-import Calendar from '@/components/Calendar'
-import { roomService } from '@/services/roomService'
+import BookingCard from '@/components/BookingCard'
 import { bookingService } from '@/services/bookingService'
-import type { Room, Booking, RoomType } from '@/types'
+import type { Booking } from '@/types'
+import toast from 'react-hot-toast'
 
-export default function BookingsPage() {
+export default function MyBookingsPage() {
+  const router = useRouter()
 
-  // temporary user
   const user = {
     id: '1',
     name: 'Xian Sheng'
   }
 
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [allBookings, setAllBookings] = useState<Booking[]>([])
-  const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState<RoomType | ''>('')
-  const [floorFilter, setFloorFilter] = useState<string>('')
-  const [capacityFilter, setCapacityFilter] = useState<string>('')
-  const [showFilters, setShowFilters] = useState(false)
-  const [view, setView] =
-    useState<'rooms' | 'calendar'>('rooms')
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [tab, setTab] = useState<'upcoming' | 'history'>('upcoming')
 
   useEffect(() => {
-    roomService.getAll().then(setRooms)
-    bookingService.getAll().then(setAllBookings)
+    bookingService
+      .getByUser(user.id)
+      .then(setBookings)
   }, [])
 
-  const filtered = rooms.filter((r) => {
-    const matchSearch =
-      r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.location.toLowerCase().includes(search.toLowerCase())
+  const now =
+    new Date().toISOString().split('T')[0]
 
-    const matchType =
-      !typeFilter || r.type === typeFilter
+  const upcoming = bookings.filter(
+    (b) =>
+      b.booking_date >= now &&
+      (
+        b.status === 'pending' ||
+        b.status === 'approved'
+      )
+  )
 
-    const matchFloor =
-      !floorFilter || r.floor === parseInt(floorFilter)
+  const history = bookings.filter(
+    (b) =>
+      b.booking_date < now ||
+      b.status === 'cancelled' ||
+      b.status === 'completed'
+  )
 
-    const matchCap =
-      !capacityFilter ||
-      r.capacity >= parseInt(capacityFilter)
+  async function handleCancel(
+    booking: Booking
+  ) {
+    if (!confirm(
+      'Cancel this booking?'
+    )) return
 
-    return (
-      matchSearch &&
-      matchType &&
-      matchFloor &&
-      matchCap
-    )
-  })
+    try {
+      await bookingService.cancel(
+        booking.id
+      )
 
-  const clearFilters = () => {
-    setTypeFilter('')
-    setFloorFilter('')
-    setCapacityFilter('')
-    setSearch('')
+      setBookings(prev =>
+        prev.map(b =>
+          b.id === booking.id
+            ? {
+                ...b,
+                status: 'cancelled'
+              }
+            : b
+        )
+      )
+
+      toast.success(
+        'Booking cancelled.'
+      )
+
+    } catch {
+
+      toast.error(
+        'Failed to cancel booking.'
+      )
+
+    }
   }
 
-  const hasFilters =
-    typeFilter ||
-    floorFilter ||
-    capacityFilter ||
-    search
+  const displayed =
+    tab === 'upcoming'
+      ? upcoming
+      : history
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -76,118 +93,58 @@ export default function BookingsPage() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        <Navbar title="Book a Room" />
+        <Navbar title="My Bookings" />
 
         <main className="flex-1 overflow-y-auto p-6 space-y-5">
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex border-b">
 
-            <div className="relative flex-1 min-w-[220px]">
+            {(['upcoming','history'] as const)
+            .map((t)=>(
 
-              <Search
-                size={16}
-                className="absolute left-3 top-2.5 text-slate-400"
-              />
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className="px-5 py-3"
+              >
+                {t}
+              </button>
 
-              <input
-                type="text"
-                value={search}
-                onChange={(e)=>
-                  setSearch(e.target.value)
-                }
-                placeholder="Search rooms..."
-                className="w-full pl-9 pr-4 py-2.5 border rounded-lg"
-              />
-
-            </div>
-
-            <button
-              onClick={() =>
-                setShowFilters(!showFilters)
-              }
-              className="flex items-center gap-2 px-4 py-2.5 border rounded-lg"
-            >
-              <SlidersHorizontal size={16}/>
-              Filters
-
-              {hasFilters &&
-                <span className="w-2 h-2 rounded-full bg-blue-500"/>
-              }
-
-            </button>
+            ))}
 
           </div>
 
-          {showFilters && (
+          {displayed.length===0 ? (
 
-            <div className="bg-white border rounded-xl p-4 flex gap-4 flex-wrap">
+            <div className="text-center py-16">
 
-              <select
-                value={typeFilter}
-                onChange={(e)=>
-                  setTypeFilter(
-                    e.target.value as RoomType | ''
-                  )
+              <p>
+                No {tab} bookings
+              </p>
+
+              <button
+                onClick={() =>
+                  router.push('/bookings')
                 }
               >
-                <option value="">
-                  All Types
-                </option>
-
-                <option value="discussion">
-                  Discussion
-                </option>
-
-                <option value="training">
-                  Training
-                </option>
-
-              </select>
-
-              {hasFilters && (
-
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center gap-1"
-                >
-                  <X size={14}/>
-                  Clear
-                </button>
-
-              )}
+                Book a room →
+              </button>
 
             </div>
 
-          )}
-
-          {view === 'calendar' ? (
-
-            <Calendar
-              bookings={allBookings}
-              onEventClick={(id)=>
-                console.log(id)
-              }
-            />
-
           ) : (
 
-            <>
-              <p className="text-sm text-slate-500">
-                {filtered.length} rooms found
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {displayed.map((b)=>(
+                <BookingCard
+                  key={b.id}
+                  booking={b}
+                  onCancel={handleCancel}
+                />
+              ))}
 
-                {filtered.map((room)=>(
-                  <RoomCard
-                    key={room.id}
-                    room={room}
-                  />
-                ))}
-
-              </div>
-
-            </>
+            </div>
 
           )}
 
