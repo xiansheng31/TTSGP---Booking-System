@@ -5,25 +5,30 @@ import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
+const slots = [
+  '09:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '01:00 PM',
+  '02:00 PM',
+  '03:00 PM',
+]
+
 export default function BookingsPage() {
-  const [rooms, setRooms] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [rooms,setRooms]=useState<any[]>([])
+  const [selectedDate,setSelectedDate]=useState('')
+  const [loading,setLoading]=useState(true)
 
-  const [bookingData, setBookingData] =
-    useState<Record<string, any>>({})
+  useEffect(()=>{
 
-  useEffect(() => {
-    async function loadRooms() {
-      const { data, error } =
-        await supabase
-          .from('rooms')
-          .select('*')
-          .order('name')
+    async function loadRooms(){
 
-      console.log('ROOM DATA:', data)
-      console.log('ROOM ERROR:', error)
+      const {data}=await supabase
+      .from('rooms')
+      .select('*')
+      .order('name')
 
-      if (data) {
+      if(data){
         setRooms(data)
       }
 
@@ -31,232 +36,176 @@ export default function BookingsPage() {
     }
 
     loadRooms()
-  }, [])
 
-  async function bookRoom(room: any) {
-    const values =
-      bookingData[room.id]
+  },[])
 
-    if (
-      !values?.date ||
-      !values?.start ||
-      !values?.end
-    ) {
-      alert(
-        'Please select date and time'
-      )
-      return
-    }
+  async function bookSlot(
+    room:any,
+    start:string
+  ){
 
-    const { data: sessionData } =
+    const {data:userData}=
       await supabase.auth.getUser()
 
-    const user =
-      sessionData.user
-
-    if (!user) {
+    if(!userData.user){
       alert('Please login')
       return
     }
 
-    const { error } =
-      await supabase
-        .from('bookings')
-        .insert({
-          room_id: room.id,
+    const endMap:any={
+      '09:00 AM':'10:00',
+      '10:00 AM':'11:00',
+      '11:00 AM':'12:00',
+      '01:00 PM':'14:00',
+      '02:00 PM':'15:00',
+      '03:00 PM':'16:00',
+    }
 
-          user_id: user.id,
+    const start24=
+      start.replace(' AM','')
+      .replace(' PM','')
 
-          booking_date:
-            values.date,
+    const {error}=await supabase
+      .from('bookings')
+      .insert({
+        room_id:room.id,
+        user_id:userData.user.id,
+        booking_date:selectedDate,
+        start_time:start24,
+        end_time:endMap[start],
+        status:'confirmed'
+      })
 
-          start_time:
-            values.start,
-
-          end_time:
-            values.end,
-
-          purpose:
-            values.purpose || '',
-
-          status:
-            'pending'
-        })
-
-    if (error) {
+    if(error){
       console.log(error)
       alert('Booking failed')
       return
     }
 
-    alert(
-      `${room.name} booked successfully`
-    )
+    alert('Booked successfully')
   }
 
-  return (
+  return(
     <div className="flex h-screen overflow-hidden">
 
-      <Sidebar />
+      <Sidebar/>
 
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        <Navbar title="Book a Room" />
+        <Navbar title="Bookings"/>
 
         <main className="flex-1 overflow-y-auto p-6">
 
-          <h1 className="text-3xl font-bold mb-10">
-            Available Rooms
+          <h1 className="text-3xl font-bold mb-2">
+            Bookings
           </h1>
+
+          <p className="text-gray-500 mb-6">
+            Find and book available rooms
+          </p>
+
+          <div className="mb-8">
+
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e)=>
+                setSelectedDate(
+                  e.target.value
+                )
+              }
+              className="
+              border
+              rounded
+              px-4
+              py-2
+              "
+            />
+
+          </div>
 
           {loading && (
             <p>Loading...</p>
           )}
 
-          {!loading &&
-            rooms.length===0 && (
-            <p>No rooms found.</p>
-          )}
+          <div className="space-y-5">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {rooms.map((room)=>(
+            {rooms.map(room=>(
 
               <div
                 key={room.id}
                 className="
                 bg-white
-                border
                 rounded-xl
-                p-6
-                shadow-sm
-              "
+                border
+                p-5
+                flex
+                gap-6
+                "
               >
-                <h2 className="font-bold text-2xl mb-4">
-                  {room.name}
-                </h2>
 
-                <p>
-                  <b>Type:</b>
-                  {' '}
-                  {room.type}
-                </p>
-
-                <p>
-                  <b>Capacity:</b>
-                  {' '}
-                  {room.capacity}
-                </p>
-
-                <p>
-                  <b>Floor:</b>
-                  {' '}
-                  {room.floor}
-                </p>
-
-                <p>
-                  <b>Location:</b>
-                  {' '}
-                  {room.location}
-                </p>
-
-                <div className="mt-5 space-y-3">
-
-                  <input
-                    type="date"
-                    className="w-full border rounded p-2"
-                    onChange={(e)=>
-                      setBookingData(
-                      {
-                        ...bookingData,
-
-                        [room.id]:{
-                          ...bookingData[
-                            room.id
-                          ],
-
-                          date:
-                          e.target.value
-                        }
-                      })
-                    }
-                  />
-
-                  <input
-                    type="time"
-                    className="w-full border rounded p-2"
-                    onChange={(e)=>
-                      setBookingData(
-                      {
-                        ...bookingData,
-
-                        [room.id]:{
-                          ...bookingData[
-                            room.id
-                          ],
-
-                          start:
-                          e.target.value
-                        }
-                      })
-                    }
-                  />
-
-                  <input
-                    type="time"
-                    className="w-full border rounded p-2"
-                    onChange={(e)=>
-                      setBookingData(
-                      {
-                        ...bookingData,
-
-                        [room.id]:{
-                          ...bookingData[
-                            room.id
-                          ],
-
-                          end:
-                          e.target.value
-                        }
-                      })
-                    }
-                  />
-
-                  <textarea
-                    placeholder="Purpose"
-                    className="w-full border rounded p-2"
-                    onChange={(e)=>
-                      setBookingData(
-                      {
-                        ...bookingData,
-
-                        [room.id]:{
-                          ...bookingData[
-                            room.id
-                          ],
-
-                          purpose:
-                          e.target.value
-                        }
-                      })
-                    }
-                  />
-
-                  <button
-                    onClick={()=>
-                      bookRoom(room)
-                    }
-                    className="
-                    w-full
-                    bg-blue-600
-                    hover:bg-blue-700
-                    text-white
-                    py-2
-                    rounded-lg
+                <img
+                  src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=300"
+                  className="
+                  w-40
+                  h-28
+                  object-cover
+                  rounded
                   "
-                  >
-                    Book Room
-                  </button>
+                />
+
+                <div className="flex-1">
+
+                  <h2 className="font-bold text-lg">
+                    {room.name}
+                  </h2>
+
+                  <p className="text-sm text-gray-500">
+
+                    👥 {room.capacity} seats
+
+                    &nbsp;&nbsp;
+
+                    📺 TV
+
+                    &nbsp;&nbsp;
+
+                    📝 Whiteboard
+
+                  </p>
+
+                  <div className="
+                  flex
+                  gap-2
+                  mt-5
+                  flex-wrap
+                  ">
+
+                    {slots.map(slot=>(
+
+                      <button
+                        key={slot}
+                        onClick={()=>
+                          bookSlot(
+                            room,
+                            slot
+                          )
+                        }
+                        className="
+                        px-4
+                        py-2
+                        rounded
+                        bg-green-100
+                        hover:bg-green-200
+                        text-sm
+                        "
+                      >
+                        {slot}
+                      </button>
+
+                    ))}
+
+                  </div>
 
                 </div>
 
