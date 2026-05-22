@@ -1,73 +1,64 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
+import { roomService } from '@/services/roomService'
+import type { Room } from '@/types'
 
-export default function MyBookingsPage() {
-  const router = useRouter()
+export default function BookingsPage() {
+  const [rooms, setRooms] = useState<Room[]>([])
 
-  const [tab, setTab] =
-    useState<'upcoming' | 'history'>(
-      'upcoming'
-    )
+  useEffect(() => {
+    roomService
+      .getAll()
+      .then((data) => {
+        console.log('ROOMS:', data)
+        setRooms(data)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
 
   return (
     <div className="flex h-screen overflow-hidden">
 
-      <Sidebar />
+      <Sidebar/>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
 
-        <Navbar title="My Bookings" />
+        <Navbar title="Book a Room"/>
 
         <main className="flex-1 overflow-y-auto p-6">
 
-          <div className="flex gap-3 mb-6">
-
-            <button
-              onClick={() =>
-                setTab('upcoming')
-              }
-              className="px-4 py-2 border rounded"
-            >
-              Upcoming
-            </button>
-
-            <button
-              onClick={() =>
-                setTab('history')
-              }
-              className="px-4 py-2 border rounded"
-            >
-              History
-            </button>
-
-          </div>
-
-          <h2 className="text-xl font-bold">
-
-            {tab === 'upcoming'
-              ? 'Upcoming Bookings'
-              : 'Booking History'}
-
+          <h2 className="text-2xl font-bold mb-6">
+            Available Rooms
           </h2>
 
-          <div className="mt-6 p-6 bg-white rounded border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-            No bookings yet.
+            {rooms.map((room)=>(
+              <div
+                key={room.id}
+                className="bg-white p-5 rounded-xl border shadow-sm"
+              >
+                <h3 className="font-bold text-lg">
+                  {room.name}
+                </h3>
+
+                <p>
+                  Capacity: {room.capacity}
+                </p>
+
+                <p>
+                  Type: {room.type}
+                </p>
+
+              </div>
+            ))}
 
           </div>
-
-          <button
-            onClick={() =>
-              router.push('/bookings')
-            }
-            className="mt-4 text-blue-600"
-          >
-            Book a room →
-          </button>
 
         </main>
 
