@@ -39,7 +39,6 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-
     window.location.href = '/login'
   }
 
@@ -59,6 +58,7 @@ export default function Sidebar() {
     return (
       <Link
         href={href}
+        scroll={false}
         title={collapsed ? label : undefined}
         className={cn(
           'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
