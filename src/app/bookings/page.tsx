@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import { roomService } from '@/services/roomService'
+import { supabase } from '@/lib/supabase'
 
 export default function BookingsPage() {
   const [rooms, setRooms] = useState<any[]>([])
@@ -11,14 +11,15 @@ export default function BookingsPage() {
 
   useEffect(() => {
     async function loadRooms() {
-      try {
-        const data = await roomService.getAll()
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('*')
 
-        console.log('ROOMS:', data)
+      console.log('ROOM DATA:', data)
+      console.log('ROOM ERROR:', error)
 
+      if (data) {
         setRooms(data)
-      } catch (error) {
-        console.log('ROOM ERROR:', error)
       }
 
       setLoading(false)
@@ -36,13 +37,11 @@ export default function BookingsPage() {
 
         <main className="flex-1 overflow-y-auto p-6">
 
-          <h1 className="text-3xl font-bold mb-10">
+          <h1 className="text-3xl font-bold mb-8">
             Available Rooms
           </h1>
 
-          {loading && (
-            <p>Loading...</p>
-          )}
+          {loading && <p>Loading...</p>}
 
           {!loading && rooms.length === 0 && (
             <p>No rooms found.</p>
@@ -53,31 +52,26 @@ export default function BookingsPage() {
             {rooms.map((room) => (
               <div
                 key={room.id}
-                className="border rounded-xl p-5 bg-white"
+                className="bg-white border rounded-xl p-5"
               >
                 <h2 className="font-bold text-xl">
                   {room.name}
                 </h2>
 
-                <p>
-                  Type: {room.type}
-                </p>
+                <p>Type: {room.type}</p>
 
                 <p>
                   Capacity: {room.capacity}
                 </p>
 
                 <p>
-                  Facilities:
+                  Floor: {room.floor}
                 </p>
 
-                <pre className="text-sm">
-                  {JSON.stringify(
-                    room.facilities,
-                    null,
-                    2
-                  )}
-                </pre>
+                <p>
+                  Location: {room.location}
+                </p>
+
               </div>
             ))}
 
