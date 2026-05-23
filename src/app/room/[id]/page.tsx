@@ -191,7 +191,7 @@ End: ${end}`
         end,
 
         status:
-        'confirmed'
+        'pending'
 
       })
 
