@@ -25,13 +25,14 @@ async function loadBookings(){
 const {data,error}=await supabase
 .from('bookings')
 .select(`
-*,
-users(
-name
-),
-rooms(
-name
-)
+id,
+title,
+booking_date,
+start_time,
+end_time,
+status,
+user_id,
+room_id
 `)
 .order(
 'created_at',
@@ -57,15 +58,71 @@ console.log(
 error
 )
 
+toast.error(
+error.message
+)
+
 return
 
 }
 
-if(data){
+if(!data){
 
-setBookings(data)
+return
 
 }
+
+
+const roomIds=data.map(
+b=>b.room_id
+)
+
+const userIds=data.map(
+b=>b.user_id
+)
+
+
+const {data:rooms}=await supabase
+.from('rooms')
+.select(`
+id,
+name
+`)
+
+
+const {data:users}=await supabase
+.from('users')
+.select(`
+id,
+name
+`)
+
+
+const merged=data.map(
+
+booking=>({
+
+...booking,
+
+rooms:
+rooms?.find(
+r=>r.id===booking.room_id
+),
+
+users:
+users?.find(
+u=>u.id===booking.user_id
+)
+
+})
+
+)
+
+)
+
+setBookings(
+merged
+)
 
 }
 
@@ -307,7 +364,9 @@ ACTION
 
 <tr
 key={b.id}
-className="border-b"
+className="
+border-b
+"
 >
 
 <td className="p-4">
@@ -406,6 +465,7 @@ rounded
 </tbody>
 
 </table>
+
 
 {filtered.length===0&&(
 
