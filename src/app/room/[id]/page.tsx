@@ -12,14 +12,21 @@ export default function RoomDetailsPage() {
   const [room, setRoom] = useState<any>(null)
   const [bookings, setBookings] = useState<any[]>([])
 
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0]
-  )
+  const [selectedDate, setSelectedDate] =
+    useState(
+      new Date()
+        .toISOString()
+        .split('T')[0]
+    )
 
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+
+  const [title, setTitle] =
+    useState('')
+
+  const [description, setDescription] =
+    useState('')
 
   useEffect(() => {
     loadRoom()
@@ -27,14 +34,19 @@ export default function RoomDetailsPage() {
   }, [id, selectedDate])
 
   async function loadRoom() {
-    const { data, error } = await supabase
+
+    const { data, error } =
+      await supabase
       .from('rooms')
       .select('*')
       .eq('id', id)
       .single()
 
     if (error) {
-      console.log(error)
+      console.log(
+        'ROOM ERROR:',
+        error
+      )
       return
     }
 
@@ -42,14 +54,27 @@ export default function RoomDetailsPage() {
   }
 
   async function loadBookings() {
-    const { data, error } = await supabase
+
+    const { data, error } =
+      await supabase
       .from('bookings')
       .select('*')
-      .eq('room_id', id)
-      .eq('booking_date', selectedDate)
+      .eq(
+        'room_id',
+        id
+      )
+      .eq(
+        'booking_date',
+        selectedDate
+      )
 
     if (error) {
-      console.log(error)
+
+      console.log(
+        'BOOKING LOAD ERROR:',
+        error
+      )
+
       return
     }
 
@@ -76,26 +101,41 @@ export default function RoomDetailsPage() {
     '17:00'
   ]
 
-  function isBooked(time: string) {
+  function isBooked(
+    time:string
+  ){
+
     return bookings.some(
+
       booking =>
-        time >= booking.start_time &&
-        time < booking.end_time
+
+      time >= booking.start_time &&
+
+      time < booking.end_time
+
     )
+
   }
 
-  async function confirmBooking() {
-    if (!start) {
-      alert('Please select start time')
+  async function confirmBooking(){
+
+    if(!start){
+      alert(
+        'Please select start time'
+      )
       return
     }
 
-    if (!end) {
-      alert('Please select end time')
+    if(!end){
+      alert(
+        'Please select end time'
+      )
       return
     }
 
-    const confirmBox = window.confirm(
+    const confirmBox =
+      window.confirm(
+
 `Confirm Booking?
 
 Room: ${room.name}
@@ -105,16 +145,26 @@ Date: ${selectedDate}
 Start: ${start}
 
 End: ${end}`
-    )
 
-    if (!confirmBox) return
+)
+
+    if(!confirmBox){
+      return
+    }
 
     const {
-      data: { user }
-    } = await supabase.auth.getUser()
+      data:{user}
+    }=
+    await supabase
+    .auth
+    .getUser()
 
-    if (!user) {
-      alert('Please login')
+    if(!user){
+
+      alert(
+        'Please login'
+      )
+
       return
     }
 
@@ -122,23 +172,47 @@ End: ${end}`
       await supabase
       .from('bookings')
       .insert({
-        room_id: id,
-        user_id: user.id,
+
+        room_id:id,
+
+        user_id:user.id,
+
         title,
+
         description,
-        booking_date: selectedDate,
-        start_time: start,
-        end_time: end,
-        status: 'confirmed'
+
+        booking_date:
+        selectedDate,
+
+        start_time:
+        start,
+
+        end_time:
+        end,
+
+        status:
+        'confirmed'
+
       })
 
-    if (error) {
-      console.log(error)
-      alert('Booking failed')
+    if(error){
+
+      console.log(
+        'BOOKING ERROR:',
+        error
+      )
+
+      alert(
+        error.message
+      )
+
       return
+
     }
 
-    alert('Booking successful')
+    alert(
+      'Booking successful'
+    )
 
     await loadBookings()
 
@@ -148,255 +222,345 @@ End: ${end}`
     setDescription('')
   }
 
-  if (!room) {
-    return <p>Loading...</p>
+  if(!room){
+
+    return(
+      <p>
+        Loading...
+      </p>
+    )
+
   }
 
-  return (
-    <div className="flex h-screen overflow-hidden">
+  return(
 
-      <Sidebar />
+<div className="flex h-screen overflow-hidden">
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+<Sidebar/>
 
-        <Navbar title={room.name} />
+<div className="flex-1 flex flex-col overflow-hidden">
 
-        <main className="flex-1 overflow-y-auto p-6">
+<Navbar title={room.name}/>
 
-          <div className="grid grid-cols-3 gap-8">
+<main className="flex-1 overflow-y-auto p-6">
 
-            <div className="col-span-2">
+<div className="
+grid
+grid-cols-3
+gap-8
+">
 
-              <div className="bg-white border rounded-xl p-8">
+<div className="col-span-2">
 
-                <h1 className="text-4xl font-bold mb-6">
-                  {room.name}
-                </h1>
+<div className="
+bg-white
+border
+rounded-xl
+p-8
+">
 
-                <p>Type: {room.type}</p>
-                <p>Capacity: {room.capacity}</p>
-                <p>Floor: {room.floor}</p>
-                <p>Location: {room.location}</p>
+<h1 className="
+text-4xl
+font-bold
+mb-6
+">
 
-              </div>
+{room.name}
 
+</h1>
 
-              <div className="bg-white border rounded-xl p-8 mt-8">
+<p>Type: {room.type}</p>
+<p>Capacity: {room.capacity}</p>
+<p>Floor: {room.floor}</p>
+<p>Location: {room.location}</p>
 
-                <div className="flex justify-between mb-6">
+</div>
 
-                  <h2 className="font-bold text-2xl">
-                    Availability
-                  </h2>
 
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e)=>
-                      setSelectedDate(
-                        e.target.value
-                      )
-                    }
-                    className="border rounded p-2"
-                  />
+<div className="
+bg-white
+border
+rounded-xl
+p-8
+mt-8
+">
 
-                </div>
+<div className="
+flex
+justify-between
+mb-6
+">
 
+<h2 className="
+font-bold
+text-2xl
+">
 
-                <div className="grid grid-cols-3 gap-4">
+Availability
 
-                  {slots.map((time)=>{
+</h2>
 
-                    const booked =
-                      isBooked(time)
+<input
+type="date"
+value={selectedDate}
+onChange={(e)=>
+setSelectedDate(
+e.target.value
+)}
+className="
+border
+rounded
+p-2
+"
+/>
 
-                    return(
+</div>
 
-                      <button
-                        key={time}
 
-                        disabled={booked}
+<div className="
+grid
+grid-cols-3
+gap-4
+">
 
-                        onClick={()=>{
-                          setStart(time)
-                          setEnd('')
-                        }}
+{slots.map(time=>{
 
-                        className={`
+const booked=
+isBooked(time)
 
-                        p-4
-                        rounded-xl
-                        font-medium
-                        transition
+return(
 
-                        ${
-                        booked
+<button
 
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+key={time}
 
-                        : start===time
+disabled={booked}
 
-                        ? 'bg-blue-600 text-white ring-4 ring-blue-200'
+onClick={()=>{
 
-                        : 'bg-green-100 hover:bg-green-200 text-green-700'
+setStart(time)
 
-                        }
+setEnd('')
 
-                        `}
-                      >
+}}
 
-                        {time}
+className={`
+p-4
+rounded-xl
+font-medium
 
-                      </button>
+${
+booked
+? 'bg-gray-300 text-gray-500'
+: start===time
+? 'bg-blue-600 text-white'
+: 'bg-green-100 text-green-700'
+}
+`}
 
-                    )
+>
 
-                  })}
+{time}
 
-                </div>
+</button>
 
+)
 
-                <div className="mt-6">
+})}
 
-                  <p className="font-bold mb-2">
-                    Select End Time
-                  </p>
+</div>
 
-                  <select
-                    value={end}
-                    onChange={(e)=>
-                      setEnd(
-                        e.target.value
-                      )
-                    }
-
-                    className="
-                    border
-                    rounded-lg
-                    p-3
-                    w-full
-                    "
-                  >
 
-                    <option value="">
-                      Select end time
-                    </option>
-
-                    {slots
-                    .filter(
-                      slot=>slot>start
-                    )
-                    .map(slot=>(
-
-                      <option
-                        key={slot}
-                        value={slot}
-                      >
-
-                        {slot}
-
-                      </option>
+<div className="
+mt-6
+">
 
-                    ))}
+<p className="
+font-bold
+mb-2
+">
 
-                  </select>
+Select End Time
 
-                </div>
+</p>
 
-              </div>
+<select
+value={end}
+onChange={(e)=>
+setEnd(
+e.target.value
+)}
+className="
+border
+rounded-lg
+p-3
+w-full
+"
+>
 
-            </div>
+<option value="">
+Select end time
+</option>
 
+{
+slots
+.filter(
+slot=>
+slot>start
+)
+.map(slot=>(
 
-            <div className="bg-white border rounded-xl p-8 h-fit">
+<option
+key={slot}
+value={slot}
+>
+{slot}
+</option>
 
-              <h2 className="text-2xl font-bold mb-6">
-                Book Room
-              </h2>
+))
+}
 
-              <input
-                placeholder="Meeting title"
-                value={title}
-                onChange={(e)=>
-                  setTitle(
-                    e.target.value
-                  )
-                }
+</select>
 
-                className="
-                border
-                w-full
-                p-3
-                rounded-lg
-                mb-4
-                "
-              />
+</div>
 
-              <textarea
-                placeholder="Description"
+</div>
 
-                value={description}
+</div>
 
-                onChange={(e)=>
-                  setDescription(
-                    e.target.value
-                  )
-                }
 
-                className="
-                border
-                w-full
-                h-28
-                p-3
-                rounded-lg
-                mb-4
-                "
-              />
+<div className="
+bg-white
+border
+rounded-xl
+p-8
+h-fit
+">
 
-              <p>
-                Date: {selectedDate}
-              </p>
+<h2 className="
+text-2xl
+font-bold
+mb-6
+">
 
-              <div className="mt-4 space-y-2">
+Book Room
 
-                <p>
-                  <b>Selected Start:</b>
-                  {' '}
-                  {start || 'Not selected'}
-                </p>
+</h2>
 
-                <p>
-                  <b>Selected End:</b>
-                  {' '}
-                  {end || 'Not selected'}
-                </p>
+<input
 
-              </div>
+placeholder="
+Meeting title
+"
 
-              <button
-                onClick={confirmBooking}
+value={title}
 
-                className="
-                w-full
-                mt-6
-                py-4
-                rounded-xl
-                bg-blue-600
-                hover:bg-blue-700
-                text-white
-                "
-              >
-                Confirm Booking
-              </button>
+onChange={(e)=>
+setTitle(
+e.target.value
+)}
 
-            </div>
+className="
+border
+w-full
+p-3
+rounded-lg
+mb-4
+"
+/>
 
-          </div>
+<textarea
 
-        </main>
+placeholder="
+Description
+"
 
-      </div>
+value={description}
 
-    </div>
-  )
+onChange={(e)=>
+setDescription(
+e.target.value
+)}
+
+className="
+border
+w-full
+h-28
+p-3
+rounded-lg
+mb-4
+"
+/>
+
+<p>
+Date:
+{' '}
+{selectedDate}
+</p>
+
+<div className="
+mt-4
+space-y-2
+">
+
+<p>
+
+<b>
+Selected Start:
+</b>
+
+{' '}
+
+{start || 'Not selected'}
+
+</p>
+
+<p>
+
+<b>
+Selected End:
+</b>
+
+{' '}
+
+{end || 'Not selected'}
+
+</p>
+
+</div>
+
+
+<button
+
+onClick={
+confirmBooking
+}
+
+className="
+w-full
+mt-6
+py-4
+rounded-xl
+bg-blue-600
+text-white
+"
+
+>
+
+Confirm Booking
+
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+</div>
+
+)
+
 }
