@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect,useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import { Search,Check,X } from 'lucide-react'
+import { Search, Check, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
-export default function BookingManagementPage(){
+export default function BookingManagementPage() {
 
 const [bookings,setBookings]=useState<any[]>([])
 const [search,setSearch]=useState('')
@@ -68,6 +68,8 @@ return
 
 if(!data){
 
+setBookings([])
+
 return
 
 }
@@ -107,16 +109,14 @@ booking=>({
 rooms:
 rooms?.find(
 r=>r.id===booking.room_id
-),
+) || null,
 
 users:
 users?.find(
 u=>u.id===booking.user_id
-)
+) || null
 
 })
-
-)
 
 )
 
@@ -125,6 +125,7 @@ merged
 )
 
 }
+
 
 
 async function updateStatus(
@@ -163,37 +164,39 @@ loadBookings()
 
 const filtered=bookings.filter(
 
-b=>{
+(b)=>{
 
 const matchSearch=
 
-b.users?.name
-?.toLowerCase()
+((b.users?.name || '')
+.toLowerCase()
 .includes(
 search.toLowerCase()
-)
+))
 
 ||
 
-b.rooms?.name
-?.toLowerCase()
+((b.rooms?.name || '')
+.toLowerCase()
 .includes(
 search.toLowerCase()
-)
+))
 
 ||
 
-b.title
-?.toLowerCase()
+((b.title || '')
+.toLowerCase()
 .includes(
 search.toLowerCase()
-)
+))
+
 
 const matchStatus=
 
 !statusFilter
 ||
 b.status===statusFilter
+
 
 return(
 matchSearch
@@ -204,6 +207,7 @@ matchStatus
 }
 
 )
+
 
 
 return(
@@ -263,7 +267,7 @@ Search bookings...
 "
 className="
 w-full
-pl-9
+pl-10
 pr-4
 py-2
 border
@@ -272,6 +276,7 @@ rounded-lg
 />
 
 </div>
+
 
 <select
 value={statusFilter}
@@ -311,6 +316,7 @@ Completed
 </select>
 
 </div>
+
 
 
 <div className="
@@ -370,15 +376,15 @@ border-b
 >
 
 <td className="p-4">
-{b.users?.name||'-'}
+{b.users?.name || '-'}
 </td>
 
 <td className="p-4">
-{b.rooms?.name||'-'}
+{b.rooms?.name || '-'}
 </td>
 
 <td className="p-4">
-{b.title||'-'}
+{b.title || '-'}
 </td>
 
 <td className="p-4">
@@ -412,7 +418,7 @@ flex
 gap-2
 ">
 
-{b.status==='pending'&&(
+{b.status==='pending' && (
 
 <button
 onClick={()=>
@@ -424,8 +430,7 @@ b.id,
 className="
 bg-green-600
 text-white
-px-3
-py-1
+p-2
 rounded
 "
 >
@@ -435,6 +440,7 @@ rounded
 </button>
 
 )}
+
 
 <button
 onClick={()=>
@@ -446,8 +452,7 @@ b.id,
 className="
 bg-red-600
 text-white
-px-3
-py-1
+p-2
 rounded
 "
 >
@@ -467,7 +472,7 @@ rounded
 </table>
 
 
-{filtered.length===0&&(
+{filtered.length===0 && (
 
 <div className="
 p-10
