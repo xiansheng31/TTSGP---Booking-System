@@ -1,126 +1,102 @@
 'use client'
 
-import { useEffect,useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
-export default function RoomDetailsPage(){
+export default function RoomDetailsPage() {
+  const { id } = useParams()
 
-const {id}=useParams()
+  const [room, setRoom] = useState<any>(null)
+  const [bookings, setBookings] = useState<any[]>([])
 
-const [room,setRoom]=useState<any>(null)
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  )
 
-const [bookings,setBookings]=useState<any[]>([])
+  const [start, setStart] = useState('')
+  const [end, setEnd] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
 
-const [selectedDate,setSelectedDate]=useState(
-new Date().toISOString().split('T')[0]
-)
+  useEffect(() => {
+    loadRoom()
+    loadBookings()
+  }, [id, selectedDate])
 
-const [start,setStart]=useState('')
-const [end,setEnd]=useState('')
+  async function loadRoom() {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-const [title,setTitle]=useState('')
-const [description,setDescription]=useState('')
+    if (error) {
+      console.log(error)
+      return
+    }
 
-useEffect(()=>{
+    setRoom(data)
+  }
 
-loadRoom()
+  async function loadBookings() {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('room_id', id)
+      .eq('booking_date', selectedDate)
 
-loadBookings()
+    if (error) {
+      console.log(error)
+      return
+    }
 
-},[id,selectedDate])
+    setBookings(data || [])
+  }
 
+  const slots = [
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00'
+  ]
 
-async function loadRoom(){
+  function isBooked(time: string) {
+    return bookings.some(
+      booking =>
+        time >= booking.start_time &&
+        time < booking.end_time
+    )
+  }
 
-const {data}=await supabase
-.from('rooms')
-.select('*')
-.eq('id',id)
-.single()
+  async function confirmBooking() {
+    if (!start) {
+      alert('Please select start time')
+      return
+    }
 
-setRoom(data)
+    if (!end) {
+      alert('Please select end time')
+      return
+    }
 
-}
-
-
-async function loadBookings(){
-
-const {data}=await supabase
-.from('bookings')
-.select('*')
-.eq('room_id',id)
-.eq('booking_date',selectedDate)
-
-if(data){
-
-setBookings(data)
-
-}
-
-}
-
-
-const slots=[
-
-'09:00',
-'09:30',
-'10:00',
-'10:30',
-'11:00',
-'11:30',
-'12:00',
-'12:30',
-'13:00',
-'13:30',
-'14:00',
-'14:30',
-'15:00',
-'15:30',
-'16:00',
-'16:30',
-'17:00'
-
-]
-
-
-function isBooked(time:string){
-
-return bookings.some(
-
-booking=>
-
-time>=booking.start_time &&
-time<booking.end_time
-
-)
-
-}
-
-
-async function confirmBooking(){
-
-if(!start){
-
-alert('Please select start time')
-
-return
-
-}
-
-if(!end){
-
-alert('Please select end time')
-
-return
-
-}
-
-const yes=window.confirm(
-
-`Confirm booking?
+    const confirmBox = window.confirm(
+`Confirm Booking?
 
 Room: ${room.name}
 
@@ -129,416 +105,298 @@ Date: ${selectedDate}
 Start: ${start}
 
 End: ${end}`
+    )
 
-)
+    if (!confirmBox) return
 
-if(!yes){
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
 
-return
+    if (!user) {
+      alert('Please login')
+      return
+    }
 
-}
+    const { error } =
+      await supabase
+      .from('bookings')
+      .insert({
+        room_id: id,
+        user_id: user.id,
+        title,
+        description,
+        booking_date: selectedDate,
+        start_time: start,
+        end_time: end,
+        status: 'confirmed'
+      })
 
+    if (error) {
+      console.log(error)
+      alert('Booking failed')
+      return
+    }
 
-const {
+    alert('Booking successful')
 
-data:{user}
+    await loadBookings()
 
-}
+    setStart('')
+    setEnd('')
+    setTitle('')
+    setDescription('')
+  }
 
-=await supabase.auth.getUser()
+  if (!room) {
+    return <p>Loading...</p>
+  }
 
+  return (
+    <div className="flex h-screen overflow-hidden">
 
-if(!user){
+      <Sidebar />
 
-alert('Login required')
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-return
+        <Navbar title={room.name} />
 
-}
+        <main className="flex-1 overflow-y-auto p-6">
 
+          <div className="grid grid-cols-3 gap-8">
 
-const {error}=await supabase
-.from('bookings')
-.insert({
+            <div className="col-span-2">
 
-room_id:id,
+              <div className="bg-white border rounded-xl p-8">
 
-user_id:user.id,
+                <h1 className="text-4xl font-bold mb-6">
+                  {room.name}
+                </h1>
 
-title,
+                <p>Type: {room.type}</p>
+                <p>Capacity: {room.capacity}</p>
+                <p>Floor: {room.floor}</p>
+                <p>Location: {room.location}</p>
 
-description,
+              </div>
 
-booking_date:selectedDate,
 
-start_time:start,
+              <div className="bg-white border rounded-xl p-8 mt-8">
 
-end_time:end,
+                <div className="flex justify-between mb-6">
 
-status:'confirmed'
+                  <h2 className="font-bold text-2xl">
+                    Availability
+                  </h2>
 
-})
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e)=>
+                      setSelectedDate(
+                        e.target.value
+                      )
+                    }
+                    className="border rounded p-2"
+                  />
 
+                </div>
 
-if(error){
 
-console.log(error)
+                <div className="grid grid-cols-3 gap-4">
 
-alert('Booking failed')
+                  {slots.map((time)=>{
 
-return
+                    const booked =
+                      isBooked(time)
 
-}
+                    return(
 
-alert('Booking successful')
+                      <button
+                        key={time}
 
-loadBookings()
+                        disabled={booked}
 
-setStart('')
-setEnd('')
-setTitle('')
-setDescription()
+                        onClick={()=>{
+                          setStart(time)
+                          setEnd('')
+                        }}
 
-}
+                        className={`
 
+                        p-4
+                        rounded-xl
+                        font-medium
+                        transition
 
-if(!room){
+                        ${
+                        booked
 
-return <p>Loading...</p>
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
 
-}
+                        : start===time
 
+                        ? 'bg-blue-600 text-white ring-4 ring-blue-200'
 
-return(
+                        : 'bg-green-100 hover:bg-green-200 text-green-700'
 
-<div className="flex h-screen overflow-hidden">
+                        }
 
-<Sidebar/>
+                        `}
+                      >
 
-<div className="flex-1 flex flex-col overflow-hidden">
+                        {time}
 
-<Navbar title={room.name}/>
+                      </button>
 
-<main className="flex-1 overflow-y-auto p-6">
+                    )
 
-<div className="grid grid-cols-3 gap-8">
+                  })}
 
-<div className="col-span-2">
+                </div>
 
-<div className="bg-white p-8 rounded-xl border">
 
-<h1 className="text-4xl font-bold mb-6">
+                <div className="mt-6">
 
-{room.name}
+                  <p className="font-bold mb-2">
+                    Select End Time
+                  </p>
 
-</h1>
+                  <select
+                    value={end}
+                    onChange={(e)=>
+                      setEnd(
+                        e.target.value
+                      )
+                    }
 
-<p>
+                    className="
+                    border
+                    rounded-lg
+                    p-3
+                    w-full
+                    "
+                  >
 
-Type:
-{room.type}
+                    <option value="">
+                      Select end time
+                    </option>
 
-</p>
+                    {slots
+                    .filter(
+                      slot=>slot>start
+                    )
+                    .map(slot=>(
 
-<p>
+                      <option
+                        key={slot}
+                        value={slot}
+                      >
 
-Capacity:
-{room.capacity}
+                        {slot}
 
-</p>
+                      </option>
 
-<p>
+                    ))}
 
-Floor:
-{room.floor}
+                  </select>
 
-</p>
+                </div>
 
-<p>
+              </div>
 
-Location:
-{room.location}
+            </div>
 
-</p>
 
-</div>
+            <div className="bg-white border rounded-xl p-8 h-fit">
 
+              <h2 className="text-2xl font-bold mb-6">
+                Book Room
+              </h2>
 
-<div className="bg-white mt-8 p-8 rounded-xl border">
+              <input
+                placeholder="Meeting title"
+                value={title}
+                onChange={(e)=>
+                  setTitle(
+                    e.target.value
+                  )
+                }
 
-<div className="
-flex
-justify-between
-mb-6
-">
+                className="
+                border
+                w-full
+                p-3
+                rounded-lg
+                mb-4
+                "
+              />
 
-<h2 className="
-font-bold
-text-2xl
-">
+              <textarea
+                placeholder="Description"
 
-Availability
+                value={description}
 
-</h2>
+                onChange={(e)=>
+                  setDescription(
+                    e.target.value
+                  )
+                }
 
-<input
-type="date"
-value={selectedDate}
-onChange={(e)=>
-setSelectedDate(
-e.target.value
-)
-}
-/>
+                className="
+                border
+                w-full
+                h-28
+                p-3
+                rounded-lg
+                mb-4
+                "
+              />
 
-</div>
+              <p>
+                Date: {selectedDate}
+              </p>
 
+              <div className="mt-4 space-y-2">
 
-<div className="
-grid
-grid-cols-3
-gap-4
-">
+                <p>
+                  <b>Selected Start:</b>
+                  {' '}
+                  {start || 'Not selected'}
+                </p>
 
-{slots.map(time=>{
+                <p>
+                  <b>Selected End:</b>
+                  {' '}
+                  {end || 'Not selected'}
+                </p>
 
-const booked=isBooked(time)
+              </div>
 
-return(
+              <button
+                onClick={confirmBooking}
 
-<button
+                className="
+                w-full
+                mt-6
+                py-4
+                rounded-xl
+                bg-blue-600
+                hover:bg-blue-700
+                text-white
+                "
+              >
+                Confirm Booking
+              </button>
 
-key={time}
+            </div>
 
-disabled={booked}
+          </div>
 
-onClick={()=>{
+        </main>
 
-setStart(time)
+      </div>
 
-setEnd('')
-
-}}
-
-className={`
-
-p-4
-rounded-xl
-font-medium
-transition
-
-${
-booked
-
-? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-
-: start===time
-
-? 'bg-blue-600 text-white ring-4 ring-blue-200'
-
-: 'bg-green-100 hover:bg-green-200 text-green-700'
-
-}
-
-`}
->
-
-{time}
-
-</button>
-
-)
-
-})}
-
-</div>
-
-
-<div className="
-mt-6
-">
-
-<p className="font-bold mb-2">
-
-Select End Time
-
-</p>
-
-<select
-
-value={end}
-
-onChange={(e)=>
-setEnd(
-e.target.value
-)
-}
-
-className="
-border
-rounded-lg
-p-3
-w-full
-"
-
->
-
-<option value="">
-
-Select end time
-
-</option>
-
-{slots
-.filter(
-slot=>slot>start
-)
-.map(slot=>(
-
-<option
-key={slot}
-value={slot}
->
-
-{slot}
-
-</option>
-
-))}
-
-</select>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div className="bg-white p-8 rounded-xl border h-fit">
-
-<h2 className="
-text-2xl
-font-bold
-mb-6
-">
-
-Book Room
-
-</h2>
-
-<input
-
-placeholder="Meeting title"
-
-value={title}
-
-onChange={(e)=>
-setTitle(
-e.target.value
-)
-}
-
-className="
-border
-w-full
-p-3
-rounded-lg
-mb-4
-"
-/>
-
-
-<textarea
-
-placeholder="Description"
-
-value={description}
-
-onChange={(e)=>
-setDescription(
-e.target.value
-)
-}
-
-className="
-border
-w-full
-p-3
-rounded-lg
-mb-4
-h-28
-"
-/>
-
-
-<p>
-
-Date:
-{' '}
-{selectedDate}
-
-</p>
-
-<div className="mt-4 space-y-2">
-
-<p>
-
-<b>
-Selected Start:
-</b>
-
-{' '}
-
-{start || 'Not selected'}
-
-</p>
-
-<p>
-
-<b>
-Selected End:
-</b>
-
-{' '}
-
-{end || 'Not selected'}
-
-</p>
-
-</div>
-
-
-<button
-
-onClick={confirmBooking}
-
-className="
-w-full
-bg-blue-600
-text-white
-rounded-xl
-py-4
-mt-6
-hover:bg-blue-700
-"
-
->
-
-Confirm Booking
-
-</button>
-
-</div>
-
-</div>
-
-</main>
-
-</div>
-
-</div>
-
-)
-
+    </div>
+  )
 }
