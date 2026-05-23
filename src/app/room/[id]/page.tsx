@@ -2,199 +2,225 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Image from 'next/image'
-import {
-Users,
-MapPin,
-ArrowLeft,
-Tv,
-PenLine,
-Video,
-Projector,
-CheckCircle,
-XCircle
-} from 'lucide-react'
-
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import { useAuth } from '@/hooks/useAuth'
-import { roomService } from '@/services/roomService'
 import { supabase } from '@/lib/supabase'
-import { generateTimeSlots, formatTime, cn } from '@/utils/helpers'
-import toast from 'react-hot-toast'
+import Image from 'next/image'
+
+export default function RoomDetailPage() {
+  const router = useRouter()
+  const params = useParams()
 
-const facilityMap = {
-tv:{icon:Tv,label:'TV'},
-projector:{icon:Projector,label:'Projector'},
-whiteboard:{icon:PenLine,label:'Whiteboard'},
-zoom:{icon:Video,label:'Zoom'}
-}
+  const [room, setRoom] = useState<any>(null)
+  const [bookings, setBookings] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-const slots = generateTimeSlots(7,22)
+  const [selectedDate, setSelectedDate] =
+    useState(
+      new Date()
+        .toISOString()
+        .split('T')[0]
+    )
 
-export default function RoomDetailPage(){
+  const [title, setTitle] =
+    useState('')
 
-const router=useRouter()
-const params=useParams()
+  const [description, setDescription] =
+    useState('')
 
-const {user,loading}=useAuth()
+  const [startTime, setStartTime] =
+    useState('')
 
-const [room,setRoom]=useState<any>(null)
-const [bookings,setBookings]=useState<any[]>([])
+  const [endTime, setEndTime] =
+    useState('')
 
-const [selectedDate,setSelectedDate]=useState(
-new Date().toISOString().split('T')[0]
-)
+  const slots = [
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00'
+  ]
 
-const [selectedStart,setSelectedStart]=useState('')
-const [selectedEnd,setSelectedEnd]=useState('')
+  useEffect(() => {
 
-const [title,setTitle]=useState('')
-const [description,setDescription]=useState('')
+    async function loadData() {
 
-const [submitting,setSubmitting]=useState(false)
+      if (!params?.id) return
 
-useEffect(()=>{
+      const { data: roomData } =
+        await supabase
+          .from('rooms')
+          .select('*')
+          .eq(
+            'id',
+            params.id
+          )
+          .single()
 
-if(!loading && !user){
-router.push('/login')
-}
+      setRoom(roomData)
 
-},[user,loading])
+      const {
+        data: bookingData
+      } =
+      await supabase
+      .from('bookings')
+      .select('*')
+      .eq(
+        'room_id',
+        params.id
+      )
+      .eq(
+        'booking_date',
+        selectedDate
+      )
 
-useEffect(()=>{
+      setBookings(
+        bookingData || []
+      )
 
-if(!params.id)return
+      setLoading(false)
+    }
 
-loadRoom()
+    loadData()
 
-},[params.id])
+  },[
+    params,
+    selectedDate
+  ])
 
-useEffect(()=>{
 
-if(!params.id)return
+  function booked(
+    slot:string
+  ){
 
-loadBookings()
+    return bookings.some(
 
-},[params.id,selectedDate])
+      (b)=>
 
+      b.start_time <= slot &&
 
-async function loadRoom(){
+      b.end_time > slot
 
-const data=
-await roomService.getById(
-params.id as string
-)
+    )
 
-setRoom(data)
+  }
 
-}
 
+  async function bookRoom(){
 
-async function loadBookings(){
+    const {
+      data
+    }=
+    await supabase
+    .auth
+    .getUser()
 
-const {data,error}=await supabase
-.from('bookings')
-.select('*')
-.eq('room_id',params.id)
-.eq('booking_date',selectedDate)
+    if(
+      !data.user
+    ){
 
-if(error){
+      alert(
+        'Please login'
+      )
 
-console.log(error)
+      return
+    }
 
-return
-}
+    if(
+      !title ||
+      !startTime ||
+      !endTime
+    ){
 
-setBookings(data||[])
+      alert(
+        'Fill all details'
+      )
 
-}
+      return
+    }
 
+    const {error}=
+    await supabase
+    .from(
+      'bookings'
+    )
+    .insert({
 
-function isBooked(slot:string){
+      room_id:
+      room.id,
 
-return bookings.some(
+      user_id:
+      data.user.id,
 
-(b)=>
+      booking_date:
+      selectedDate,
 
-b.start_time<=slot &&
-b.end_time>slot
+      start_time:
+      startTime,
 
-)
+      end_time:
+      endTime,
 
-}
+      title,
 
-async function handleBook(){
+      description,
 
-if(
-!selectedStart||
-!selectedEnd||
-!title
-){
+      status:
+      'pending'
 
-toast.error(
-'Complete all fields'
-)
+    })
 
-return
+    if(error){
 
-}
+      console.log(
+        error
+      )
 
-setSubmitting(true)
+      alert(
+        'Booking failed'
+      )
 
-const {error}=await supabase
-.from('bookings')
-.insert({
+      return
+    }
 
-room_id:room.id,
+    alert(
+      'Booking success'
+    )
 
-user_id:user?.id,
+    router.push(
+      '/my-bookings'
+    )
 
-booking_date:selectedDate,
+  }
 
-start_time:selectedStart,
+  if(
+    loading
+  ){
 
-end_time:selectedEnd,
+    return(
+      <div>
+        Loading...
+      </div>
+    )
+  }
 
-title,
+  if(
+    !room
+  ){
 
-description,
+    return(
+      <div>
+        Room not found
+      </div>
+    )
+  }
 
-status:'pending'
-
-})
-
-setSubmitting(false)
-
-if(error){
-
-console.log(error)
-
-toast.error(
-'Booking failed'
-)
-
-return
-
-}
-
-toast.success(
-'Booking created'
-)
-
-router.push(
-'/my-bookings'
-)
-
-}
-
-if(
-loading||
-!user||
-!room
-)return null
-
-return(
+  return(
 
 <div className="flex h-screen overflow-hidden">
 
@@ -207,39 +233,56 @@ return(
 <main className="flex-1 overflow-y-auto p-6">
 
 <button
-onClick={()=>router.back()}
-className="flex items-center gap-2 mb-5"
+onClick={()=>
+router.back()
+}
+className="
+mb-5
+text-blue-600
+"
 >
-
-<ArrowLeft size={16}/>
-
-Back
-
+← Back
 </button>
 
-<div className="grid lg:grid-cols-3 gap-6">
 
-<div className="lg:col-span-2 space-y-6">
+<div className="
+grid
+lg:grid-cols-3
+gap-6
+">
+
+<div className="
+lg:col-span-2
+space-y-6
+">
 
 <div className="
 relative
-h-72
+h-[300px]
 rounded-xl
 overflow-hidden
-bg-slate-100
 ">
 
 <Image
+
+fill
+
+alt=""
+
+className="
+object-cover
+"
+
 src={
 room.photo_url ||
+
 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200'
 }
-fill
-alt=""
-className="object-cover"
+
 />
 
 </div>
+
 
 <div className="
 bg-white
@@ -248,93 +291,45 @@ rounded-xl
 p-6
 ">
 
-<h1 className="text-2xl font-bold">
+<h1 className="
+text-3xl
+font-bold
+mb-4
+">
 
 {room.name}
 
 </h1>
 
-<div className="
-flex
-gap-4
-text-slate-500
-mt-2
-">
+<p>
+Type:
+{room.type}
+</p>
 
-<div>
-
-<MapPin size={14}/>
-
-{room.location}
-
-</div>
-
-<div>
-
-<Users size={14}/>
-
+<p>
+Capacity:
 {room.capacity}
+</p>
+
+<p>
+Floor:
+{room.floor}
+</p>
+
+<p>
+Location:
+{room.location}
+</p>
 
 </div>
 
-</div>
 
 <div className="
-flex
-gap-2
-mt-4
-flex-wrap
-">
-
-{room.facilities?.map(
-(f:string)=>{
-
-const item=
-facilityMap[
-f as keyof typeof facilityMap
-]
-
-if(!item)return null
-
-const Icon=item.icon
-
-return(
-
-<div
-key={f}
-className="
-border
-rounded
-px-3
-py-1
-flex
-items-center
-gap-2
-"
->
-
-<Icon size={14}/>
-
-{item.label}
-
-</div>
-
-)
-
-})}
-
-</div>
-
-</div>
-
-<div
-className="
 bg-white
-rounded-xl
 border
+rounded-xl
 p-6
-"
->
+">
 
 <div className="
 flex
@@ -342,32 +337,47 @@ justify-between
 mb-4
 ">
 
-<h2>
+<h2 className="
+font-bold
+">
 Availability
 </h2>
 
 <input
+
 type="date"
-value={selectedDate}
-onChange={(e)=>
+
+value={
+selectedDate
+}
+
+onChange={
+(e)=>
+
 setSelectedDate(
 e.target.value
 )
+
 }
+
 />
 
 </div>
 
+
 <div className="
 grid
-grid-cols-4
-gap-2
+grid-cols-3
+gap-3
 ">
 
-{slots.map((slot)=>{
+{slots.map(
+(slot)=>{
 
-const booked=
-isBooked(slot)
+const isBooked=
+booked(
+slot
+)
 
 return(
 
@@ -375,24 +385,25 @@ return(
 
 key={slot}
 
-disabled={booked}
+disabled={
+isBooked
+}
 
 onClick={()=>{
 
 if(
-!selectedStart||
-selectedEnd
+!startTime
 ){
 
-setSelectedStart(slot)
-
-setSelectedEnd('')
+setStartTime(
+slot
+)
 
 }
 
 else{
 
-setSelectedEnd(
+setEndTime(
 slot
 )
 
@@ -400,21 +411,29 @@ slot
 
 }}
 
-className={cn(
+className={`
+p-3
+rounded-lg
+text-sm
 
-'rounded p-2 text-xs',
+${
+isBooked
 
-booked
+?
 
-? 'bg-red-100 text-red-500'
+'bg-red-100 text-red-600'
 
-: 'bg-green-100 text-green-700'
+:
 
-)}
+'bg-green-100 text-green-700'
+
+}
+
+`}
 
 >
 
-{formatTime(slot)}
+{slot}
 
 </button>
 
@@ -428,109 +447,127 @@ booked
 
 </div>
 
+
 <div>
 
-<div
-className="
+<div className="
 bg-white
 border
 rounded-xl
 p-6
 sticky
-top-4
-"
->
+top-5
+">
 
-<h2 className="font-bold">
+<h2 className="
+font-bold
+mb-5
+">
 
 Book Room
 
 </h2>
 
 <input
-placeholder="Meeting title"
-value={title}
-onChange={(e)=>
-setTitle(e.target.value)
+
+placeholder="
+Meeting title
+"
+
+value={
+title
 }
+
+onChange={
+(e)=>
+
+setTitle(
+e.target.value
+)
+
+}
+
 className="
 border
 w-full
-p-3
 rounded
-mt-4
+p-3
+mb-4
 "
+
 />
 
 <textarea
-placeholder="Description"
-value={description}
-onChange={(e)=>
+
+placeholder="
+Description
+"
+
+value={
+description
+}
+
+onChange={
+(e)=>
+
 setDescription(
 e.target.value
-)}
+)
+
+}
+
 className="
 border
 w-full
-p-3
 rounded
-mt-4
+p-3
+mb-4
 "
+
 />
 
+
 <div className="
-mt-4
-space-y-2
 text-sm
+space-y-2
+mb-5
 ">
 
-<div>
-
+<p>
 Date:
 {selectedDate}
+</p>
 
-</div>
-
-<div>
-
+<p>
 Start:
-{selectedStart}
+{startTime}
+</p>
 
-</div>
-
-<div>
-
+<p>
 End:
-{selectedEnd}
+{endTime}
+</p>
 
 </div>
 
-</div>
 
 <button
 
 onClick={
-handleBook
-}
-
-disabled={
-submitting
+bookRoom
 }
 
 className="
 bg-blue-600
-w-full
-mt-5
 text-white
+w-full
 rounded-lg
 p-3
 "
 
 >
 
-{submitting
-?'Booking...'
-:'Confirm Booking'}
+Confirm Booking
 
 </button>
 
