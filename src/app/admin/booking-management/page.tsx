@@ -27,7 +27,7 @@ const {data,error}=await supabase
 .select(`
 *,
 users(
-username
+name
 ),
 rooms(
 name
@@ -40,8 +40,26 @@ ascending:false
 }
 )
 
-console.log(data)
-console.log(error)
+console.log(
+'BOOKINGS:',
+data
+)
+
+console.log(
+'ERROR:',
+error
+)
+
+if(error){
+
+console.log(
+'BOOKING LOAD ERROR:',
+error
+)
+
+return
+
+}
 
 if(data){
 
@@ -78,7 +96,7 @@ return
 }
 
 toast.success(
-'Updated'
+'Updated successfully'
 )
 
 loadBookings()
@@ -92,7 +110,7 @@ b=>{
 
 const matchSearch=
 
-b.users?.username
+b.users?.name
 ?.toLowerCase()
 .includes(
 search.toLowerCase()
@@ -145,9 +163,7 @@ overflow-hidden
 ">
 
 <Navbar
-title="
-Booking Management
-"
+title="Booking Management"
 />
 
 <main className="
@@ -247,15 +263,11 @@ border
 overflow-hidden
 ">
 
-<table className="
-w-full
-">
+<table className="w-full">
 
 <thead>
 
-<tr className="
-border-b
-">
+<tr className="border-b">
 
 <th className="p-4 text-left">
 USER
@@ -295,13 +307,11 @@ ACTION
 
 <tr
 key={b.id}
-className="
-border-b
-"
+className="border-b"
 >
 
 <td className="p-4">
-{b.users?.username||'-'}
+{b.users?.name||'-'}
 </td>
 
 <td className="p-4">
@@ -309,7 +319,7 @@ border-b
 </td>
 
 <td className="p-4">
-{b.title}
+{b.title||'-'}
 </td>
 
 <td className="p-4">
@@ -396,7 +406,6 @@ rounded
 </tbody>
 
 </table>
-
 
 {filtered.length===0&&(
 
