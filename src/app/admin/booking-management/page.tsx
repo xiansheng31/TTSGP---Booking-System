@@ -1,504 +1,425 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect,useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
+import { Search,Check,X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 
-export default function BookingManagementPage() {
+export default function BookingManagementPage(){
 
-  const [bookings,setBookings]=useState<any[]>([])
-  const [filtered,setFiltered]=useState<any[]>([])
-  const [loading,setLoading]=useState(true)
-  const [search,setSearch]=useState('')
-  const [status,setStatus]=useState('')
+const [bookings,setBookings]=useState<any[]>([])
+const [search,setSearch]=useState('')
+const [statusFilter,setStatusFilter]=useState('')
 
-  useEffect(()=>{
+useEffect(()=>{
 
-    loadBookings()
+loadBookings()
 
-  },[])
+},[])
 
 
-  async function loadBookings(){
+async function loadBookings(){
 
-    setLoading(true)
+const {data,error}=await supabase
+.from('bookings')
+.select(`
+*,
+users(
+username
+),
+rooms(
+name
+)
+`)
+.order(
+'created_at',
+{
+ascending:false
+}
+)
 
-    const {data,error}=await supabase
-      .from('bookings')
-      .select(`
-        *,
-        users(
-          username
-        ),
-        rooms(
-          name
-        )
-      `)
-      .order(
-        'created_at',
-        {
-          ascending:false
-        }
-      )
+console.log(data)
+console.log(error)
 
-    console.log(
-      'BOOKINGS:',
-      data
-    )
+if(data){
 
-    console.log(
-      'ERROR:',
-      error
-    )
+setBookings(data)
 
-    if(data){
+}
 
-      setBookings(data)
+}
 
-      setFiltered(data)
 
-    }
+async function updateStatus(
+id:string,
+status:string
+){
 
-    setLoading(false)
+const {error}=await supabase
+.from('bookings')
+.update({
+status
+})
+.eq(
+'id',
+id
+)
 
-  }
+if(error){
 
+toast.error(
+error.message
+)
 
-  useEffect(()=>{
+return
 
-    let result=[...bookings]
+}
 
-    if(status){
+toast.success(
+'Updated'
+)
 
-      result=result.filter(
-        b=>b.status===status
-      )
+loadBookings()
 
-    }
+}
 
-    if(search){
 
-      result=result.filter(
+const filtered=bookings.filter(
 
-        b=>
+b=>{
 
-        b.rooms?.name
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+const matchSearch=
 
-        ||
+b.users?.username
+?.toLowerCase()
+.includes(
+search.toLowerCase()
+)
 
-        b.users?.username
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+||
 
-      )
+b.rooms?.name
+?.toLowerCase()
+.includes(
+search.toLowerCase()
+)
 
-    }
+||
+
+b.title
+?.toLowerCase()
+.includes(
+search.toLowerCase()
+)
+
+const matchStatus=
+
+!statusFilter
+||
+b.status===statusFilter
+
+return(
+matchSearch
+&&
+matchStatus
+)
+
+}
+
+)
+
+
+return(
+
+<div className="flex h-screen overflow-hidden">
+
+<Sidebar/>
+
+<div className="
+flex-1
+flex
+flex-col
+overflow-hidden
+">
+
+<Navbar
+title="
+Booking Management
+"
+/>
+
+<main className="
+flex-1
+overflow-y-auto
+p-6
+space-y-5
+">
+
+<div className="
+flex
+items-center
+gap-3
+">
+
+<div className="
+relative
+flex-1
+">
+
+<Search
+size={16}
+className="
+absolute
+left-3
+top-3
+text-slate-400
+"
+/>
+
+<input
+value={search}
+onChange={(e)=>
+setSearch(
+e.target.value
+)
+}
+placeholder="
+Search bookings...
+"
+className="
+w-full
+pl-9
+pr-4
+py-2
+border
+rounded-lg
+"
+/>
+
+</div>
+
+<select
+value={statusFilter}
+onChange={(e)=>
+setStatusFilter(
+e.target.value
+)
+}
+className="
+border
+rounded-lg
+px-4
+py-2
+"
+>
+
+<option value="">
+All Statuses
+</option>
+
+<option value="pending">
+Pending
+</option>
+
+<option value="approved">
+Approved
+</option>
+
+<option value="cancelled">
+Cancelled
+</option>
+
+<option value="completed">
+Completed
+</option>
+
+</select>
+
+</div>
+
+
+<div className="
+bg-white
+rounded-xl
+border
+overflow-hidden
+">
+
+<table className="
+w-full
+">
+
+<thead>
+
+<tr className="
+border-b
+">
+
+<th className="p-4 text-left">
+USER
+</th>
+
+<th className="p-4 text-left">
+ROOM
+</th>
+
+<th className="p-4 text-left">
+TITLE
+</th>
+
+<th className="p-4 text-left">
+DATE
+</th>
+
+<th className="p-4 text-left">
+TIME
+</th>
+
+<th className="p-4 text-left">
+STATUS
+</th>
+
+<th className="p-4 text-left">
+ACTION
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{filtered.map((b)=>(
+
+<tr
+key={b.id}
+className="
+border-b
+"
+>
+
+<td className="p-4">
+{b.users?.username||'-'}
+</td>
+
+<td className="p-4">
+{b.rooms?.name||'-'}
+</td>
+
+<td className="p-4">
+{b.title}
+</td>
+
+<td className="p-4">
+{b.booking_date}
+</td>
+
+<td className="p-4">
+{b.start_time}
+-
+{b.end_time}
+</td>
 
-    setFiltered(result)
+<td className="p-4">
 
-  },[
-    search,
-    status,
-    bookings
-  ])
+<span className="
+bg-gray-100
+px-3
+py-1
+rounded-full
+">
 
-
-
-  async function updateStatus(
-    id:string,
-    newStatus:string
-  ){
-
-    const {error}=await supabase
-      .from('bookings')
-      .update({
-
-        status:newStatus
-
-      })
-      .eq(
-        'id',
-        id
-      )
-
-    if(error){
-
-      alert(
-        error.message
-      )
-
-      return
+{b.status}
 
-    }
+</span>
 
-    loadBookings()
+</td>
 
-  }
+<td className="
+p-4
+flex
+gap-2
+">
 
+{b.status==='pending'&&(
 
+<button
+onClick={()=>
+updateStatus(
+b.id,
+'approved'
+)
+}
+className="
+bg-green-600
+text-white
+px-3
+py-1
+rounded
+"
+>
 
-  return(
+<Check size={14}/>
 
-    <div className="flex h-screen overflow-hidden">
+</button>
 
-      <Sidebar/>
+)}
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+<button
+onClick={()=>
+updateStatus(
+b.id,
+'cancelled'
+)
+}
+className="
+bg-red-600
+text-white
+px-3
+py-1
+rounded
+"
+>
 
-        <Navbar
-          title="Booking Management"
-        />
+<X size={14}/>
 
-        <main className="
-        flex-1
-        overflow-y-auto
-        p-6
-        ">
-
-          <h1 className="
-          text-3xl
-          font-bold
-          mb-8
-          ">
-            Booking Management
-          </h1>
-
-
-          <div className="
-          flex
-          gap-4
-          mb-6
-          ">
-
-            <input
-              placeholder="
-              Search bookings...
-              "
-              value={search}
-              onChange={e=>
-                setSearch(
-                  e.target.value
-                )
-              }
-              className="
-              flex-1
-              border
-              rounded-xl
-              px-4
-              py-3
-              "
-            />
-
-
-            <select
-              value={status}
-              onChange={e=>
-                setStatus(
-                  e.target.value
-                )
-              }
-              className="
-              border
-              rounded-xl
-              px-4
-              py-3
-              "
-            >
-
-              <option value="">
-                All Statuses
-              </option>
-
-              <option value="pending">
-                Pending
-              </option>
-
-              <option value="approved">
-                Approved
-              </option>
-
-              <option value="cancelled">
-                Cancelled
-              </option>
-
-              <option value="completed">
-                Completed
-              </option>
+</button>
 
-            </select>
+</td>
 
-          </div>
+</tr>
 
+))}
 
-          <div className="
-          bg-white
-          border
-          rounded-2xl
-          overflow-hidden
-          ">
+</tbody>
 
-            <table className="
-            w-full
-            ">
+</table>
 
-              <thead className="
-              border-b
-              text-gray-500
-              ">
 
-                <tr>
+{filtered.length===0&&(
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    USER
-                  </th>
+<div className="
+p-10
+text-center
+text-gray-400
+">
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    ROOM
-                  </th>
+No bookings found
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    TITLE
-                  </th>
+</div>
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    DATE
-                  </th>
+)}
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    TIME
-                  </th>
+</div>
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    STATUS
-                  </th>
+</main>
 
-                  <th className="
-                  text-left
-                  p-4
-                  ">
-                    ACTIONS
-                  </th>
+</div>
 
-                </tr>
+</div>
 
-              </thead>
-
-
-              <tbody>
-
-                {loading && (
-
-                  <tr>
-
-                    <td
-                      colSpan={7}
-                      className="
-                      p-10
-                      text-center
-                      "
-                    >
-
-                      Loading...
-
-                    </td>
-
-                  </tr>
-
-                )}
-
-
-                {!loading &&
-                filtered.length===0 && (
-
-                  <tr>
-
-                    <td
-                      colSpan={7}
-                      className="
-                      p-10
-                      text-center
-                      text-gray-400
-                      "
-                    >
-
-                      No bookings found.
-
-                    </td>
-
-                  </tr>
-
-                )}
-
-
-
-                {filtered.map(b=>(
-
-                  <tr
-                    key={b.id}
-                    className="
-                    border-t
-                    "
-                  >
-
-                    <td className="p-4">
-
-                      {
-                        b.users
-                        ?.username
-                        ??
-                        '—'
-                      }
-
-                    </td>
-
-                    <td className="p-4">
-
-                      {
-                        b.rooms
-                        ?.name
-                        ??
-                        '—'
-                      }
-
-                    </td>
-
-                    <td className="p-4">
-
-                      {
-                        b.title
-                      }
-
-                    </td>
-
-                    <td className="p-4">
-
-                      {
-                        b.booking_date
-                      }
-
-                    </td>
-
-                    <td className="p-4">
-
-                      {
-                        b.start_time
-                      }
-
-                      -
-
-                      {
-                        b.end_time
-                      }
-
-                    </td>
-
-
-                    <td className="p-4">
-
-                      <span
-                        className="
-                        px-3
-                        py-1
-                        rounded-full
-                        bg-gray-100
-                        "
-                      >
-
-                        {
-                          b.status
-                        }
-
-                      </span>
-
-                    </td>
-
-
-                    <td className="
-                    p-4
-                    flex
-                    gap-2
-                    ">
-
-                      <button
-                        onClick={()=>
-                          updateStatus(
-                            b.id,
-                            'approved'
-                          )
-                        }
-                        className="
-                        px-3
-                        py-1
-                        rounded
-                        bg-green-600
-                        text-white
-                        "
-                      >
-                        Approve
-                      </button>
-
-
-                      <button
-                        onClick={()=>
-                          updateStatus(
-                            b.id,
-                            'cancelled'
-                          )
-                        }
-                        className="
-                        px-3
-                        py-1
-                        rounded
-                        bg-red-600
-                        text-white
-                        "
-                      >
-                        Reject
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </main>
-
-      </div>
-
-    </div>
-
-  )
+)
 
 }
