@@ -5,72 +5,183 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 
-export default function MyBookingsPage() {
-  const router = useRouter()
+export default function MyBookingsPage(){
 
-  const [tab, setTab] =
-    useState<'upcoming' | 'history'>(
-      'upcoming'
-    )
+const router=useRouter()
 
-  return (
-    <div className="flex h-screen overflow-hidden">
+const [tab,setTab]=
+useState<
+'upcoming'
+|
+'history'
+>(
+'upcoming'
+)
 
-      <Sidebar />
+return(
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+<div className="
+min-h-screen
+bg-slate-100
+">
 
-        <Navbar title="My Bookings" />
+<Sidebar/>
 
-        <main className="flex-1 overflow-y-auto p-6">
 
-          <div className="flex gap-3 mb-6">
+<div className="
+lg:ml-72
+min-h-screen
+flex
+flex-col
+">
 
-            <button
-              onClick={() =>
-                setTab('upcoming')
-              }
-              className="px-4 py-2 border rounded"
-            >
-              Upcoming
-            </button>
+<Navbar
+title="My Bookings"
+/>
 
-            <button
-              onClick={() =>
-                setTab('history')
-              }
-              className="px-4 py-2 border rounded"
-            >
-              History
-            </button>
 
-          </div>
+<main className="
+flex-1
+p-4
+md:p-6
+overflow-x-hidden
+">
 
-          <h2 className="text-xl font-bold">
+<div className="
+flex
+flex-wrap
+gap-3
+mb-6
+">
 
-            {tab === 'upcoming'
-              ? 'Upcoming Bookings'
-              : 'Booking History'}
+<button
+onClick={()=>
+setTab(
+'upcoming'
+)
+}
+className={`
+px-5
+py-3
+rounded-lg
+border
+transition
 
-          </h2>
+${
+tab==='upcoming'
+?
+'bg-blue-600 text-white border-blue-600'
+:
+'bg-white'
+}
+`}
+>
 
-          <div className="mt-6 p-6 bg-white rounded border">
-            No bookings yet.
-          </div>
+Upcoming
 
-          <button
-            onClick={() =>
-              router.push('/bookings')
-            }
-            className="mt-4 text-blue-600"
-          >
-            Book a room →
-          </button>
+</button>
 
-        </main>
 
-      </div>
+<button
+onClick={()=>
+setTab(
+'history'
+)
+}
+className={`
+px-5
+py-3
+rounded-lg
+border
+transition
 
-    </div>
-  )
+${
+tab==='history'
+?
+'bg-blue-600 text-white border-blue-600'
+:
+'bg-white'
+}
+`}
+>
+
+History
+
+</button>
+
+</div>
+
+
+
+<h2 className="
+text-xl
+md:text-2xl
+font-bold
+">
+
+{
+tab==='upcoming'
+?
+'Upcoming Bookings'
+:
+'Booking History'
+}
+
+</h2>
+
+
+
+<div className="
+mt-6
+bg-white
+rounded-xl
+border
+p-8
+shadow-sm
+">
+
+<div className="
+text-center
+py-10
+">
+
+<p className="
+text-gray-500
+">
+
+No bookings yet
+
+</p>
+
+
+<button
+onClick={()=>
+router.push(
+'/bookings'
+)
+}
+className="
+mt-6
+text-blue-600
+font-medium
+hover:underline
+"
+>
+
+Book a room →
+
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+</div>
+
+)
+
 }
