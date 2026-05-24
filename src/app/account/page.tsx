@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import toast from 'react-hot-toast'
@@ -20,24 +19,15 @@ phone:'0123456789'
 
 }
 
-const [name,setName]=
+const [email,setEmail]=
 useState(
-user.name
+user.email
 )
 
 const [phone,setPhone]=
 useState(
 user.phone
 )
-
-const [department,setDepartment]=
-useState(
-user.department
-)
-
-const [newPassword,
-setNewPassword]=
-useState('')
 
 const [saving,setSaving]=
 useState(false)
@@ -58,31 +48,6 @@ setSaving(false)
 },1000)
 
 }
-
-
-function changePassword(){
-
-if(
-!newPassword ||
-newPassword.length<8
-){
-
-toast.error(
-'Password minimum 8 characters'
-)
-
-return
-
-}
-
-toast.success(
-'Password updated'
-)
-
-setNewPassword('')
-
-}
-
 
 
 return(
@@ -185,6 +150,7 @@ break-all
 text-xs
 text-slate-400
 mt-1
+capitalize
 ">
 
 {user.role}
@@ -201,14 +167,96 @@ mt-1
 space-y-4
 ">
 
+<label className="
+text-sm
+font-medium
+">
+
+Full Name
+
+</label>
+
 <input
-value={name}
+value={user.name}
+disabled
+className="
+w-full
+border
+rounded-lg
+p-3
+bg-gray-100
+text-gray-500
+cursor-not-allowed
+"
+/>
+
+<p className="
+text-xs
+text-gray-400
+">
+
+Managed by administrator
+
+</p>
+
+
+
+<label className="
+text-sm
+font-medium
+mt-4
+block
+">
+
+Department
+
+</label>
+
+<input
+value={user.department}
+disabled
+className="
+w-full
+border
+rounded-lg
+p-3
+bg-gray-100
+text-gray-500
+cursor-not-allowed
+"
+/>
+
+<p className="
+text-xs
+text-gray-400
+">
+
+Managed by administrator
+
+</p>
+
+
+
+<label className="
+text-sm
+font-medium
+mt-4
+block
+">
+
+Email
+
+</label>
+
+<input
+value={email}
 onChange={(e)=>
-setName(
+
+setEmail(
 e.target.value
 )
+
 }
-placeholder="Name"
 className="
 w-full
 border
@@ -218,31 +266,27 @@ p-3
 />
 
 
-<input
-value={department}
-onChange={(e)=>
-setDepartment(
-e.target.value
-)
-}
-placeholder="Department"
-className="
-w-full
-border
-rounded-lg
-p-3
-"
-/>
 
+<label className="
+text-sm
+font-medium
+mt-4
+block
+">
+
+Phone
+
+</label>
 
 <input
 value={phone}
 onChange={(e)=>
+
 setPhone(
 e.target.value
 )
+
 }
-placeholder="Phone"
 className="
 w-full
 border
@@ -250,6 +294,8 @@ rounded-lg
 p-3
 "
 />
+
+
 
 <button
 onClick={
@@ -264,6 +310,7 @@ px-6
 py-3
 rounded-xl
 hover:bg-blue-700
+mt-5
 "
 >
 
@@ -283,7 +330,6 @@ saving
 
 
 
-
 <div className="
 bg-white
 rounded-2xl
@@ -292,65 +338,30 @@ p-6
 shadow-sm
 ">
 
-<div className="
-flex
-items-center
-gap-2
-mb-4
-">
-
-<Lock size={18}/>
-
 <h3 className="
 font-semibold
+mb-3
 ">
 
-Change Password
+Account Security
 
 </h3>
 
-</div>
-
-
-<input
-type="password"
-value={newPassword}
-onChange={(e)=>
-setNewPassword(
-e.target.value
-)
-}
-placeholder="
-Minimum 8 characters
-"
-className="
-w-full
+<div className="
+bg-yellow-50
 border
-rounded-lg
-p-3
-"
-/>
-
-
-<button
-onClick={
-changePassword
-}
-className="
-mt-4
-w-full
-sm:w-auto
-bg-black
-text-white
-px-6
-py-3
+border-yellow-200
 rounded-xl
-"
->
+p-4
+text-sm
+text-yellow-700
+">
 
-Update Password
+Password updates are managed by administrators.
 
-</button>
+Please contact IT if changes are required.
+
+</div>
 
 </div>
 
