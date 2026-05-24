@@ -1,185 +1,367 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import toast from 'react-hot-toast'
 
-export default function AccountPage() {
+export default function AccountPage(){
 
-  const user = {
-    id:'1',
-    name:'Xian Sheng',
-    email:'xiansheng@gmail.com',
-    employee_id:'TTSGP001',
-    role:'admin',
-    department:'IT',
-    phone:'0123456789'
-  }
+const user={
 
-  const [name,setName] =
-    useState(user.name)
+id:'1',
+name:'Xian Sheng',
+email:'xiansheng@gmail.com',
+employee_id:'TTSGP001',
+role:'admin',
+department:'IT',
+phone:'0123456789'
 
-  const [phone,setPhone] =
-    useState(user.phone)
+}
 
-  const [department,setDepartment] =
-    useState(user.department)
+const [name,setName]=
+useState(
+user.name
+)
 
-  const [newPassword,setNewPassword] =
-    useState('')
+const [phone,setPhone]=
+useState(
+user.phone
+)
 
-  const [saving,setSaving] =
-    useState(false)
+const [department,setDepartment]=
+useState(
+user.department
+)
 
-  async function saveProfile(){
+const [newPassword,
+setNewPassword]=
+useState('')
 
-    setSaving(true)
+const [saving,setSaving]=
+useState(false)
 
-    setTimeout(()=>{
 
-      toast.success(
-        'Profile updated.'
-      )
+async function saveProfile(){
 
-      setSaving(false)
+setSaving(true)
 
-    },1000)
+setTimeout(()=>{
 
-  }
+toast.success(
+'Profile updated'
+)
 
-  function changePassword(){
+setSaving(false)
 
-    if(
-      !newPassword ||
-      newPassword.length<8
-    ){
+},1000)
 
-      toast.error(
-        'Password minimum 8 characters'
-      )
+}
 
-      return
-    }
 
-    toast.success(
-      'Password updated'
-    )
+function changePassword(){
 
-    setNewPassword('')
+if(
+!newPassword ||
+newPassword.length<8
+){
 
-  }
+toast.error(
+'Password minimum 8 characters'
+)
 
-  return (
+return
 
-    <div className="flex h-screen overflow-hidden">
+}
 
-      <Sidebar/>
+toast.success(
+'Password updated'
+)
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+setNewPassword('')
 
-        <Navbar title="My Account"/>
+}
 
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 max-w-2xl">
 
-          <div className="bg-white rounded-xl border p-6">
 
-            <div className="flex items-center gap-4 mb-6">
+return(
 
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+<div className="
+min-h-screen
+bg-slate-100
+">
 
-                XS
+<Sidebar/>
 
-              </div>
 
-              <div>
+<div className="
+lg:ml-72
+min-h-screen
+flex
+flex-col
+">
 
-                <p className="font-semibold">
-                  {user.name}
-                </p>
+<Navbar
+title="My Account"
+/>
 
-                <p className="text-sm text-slate-500">
-                  {user.email}
-                </p>
 
-              </div>
+<main className="
+flex-1
+p-4
+md:p-6
+overflow-x-hidden
+">
 
-            </div>
+<div className="
+max-w-3xl
+space-y-6
+">
 
-            <input
-              value={name}
-              onChange={(e)=>
-                setName(e.target.value)
-              }
-              className="w-full border p-3 rounded mb-3"
-            />
 
-            <input
-              value={department}
-              onChange={(e)=>
-                setDepartment(e.target.value)
-              }
-              className="w-full border p-3 rounded mb-3"
-            />
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+shadow-sm
+">
 
-            <input
-              value={phone}
-              onChange={(e)=>
-                setPhone(e.target.value)
-              }
-              className="w-full border p-3 rounded"
-            />
+<div className="
+flex
+flex-col
+sm:flex-row
+items-center
+sm:items-start
+gap-4
+mb-6
+">
 
-            <button
-              onClick={saveProfile}
-              className="mt-5 bg-blue-600 text-white px-5 py-3 rounded"
-            >
-              {saving
-                ? 'Saving...'
-                : 'Save Profile'
-              }
-            </button>
+<div className="
+w-20
+h-20
+rounded-full
+bg-blue-600
+flex
+items-center
+justify-center
+text-white
+text-3xl
+font-bold
+shrink-0
+">
 
-          </div>
+XS
 
-          <div className="bg-white rounded-xl border p-6">
+</div>
 
-            <div className="flex gap-2 mb-4">
 
-              <Lock size={18}/>
+<div className="
+text-center
+sm:text-left
+">
 
-              <h3>
-                Change Password
-              </h3>
+<p className="
+font-semibold
+text-lg
+">
 
-            </div>
+{user.name}
 
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e)=>
-                setNewPassword(
-                  e.target.value
-                )
-              }
-              placeholder="minimum 8 characters"
-              className="w-full border p-3 rounded"
-            />
+</p>
 
-            <button
-              onClick={changePassword}
-              className="mt-4 bg-black text-white px-5 py-3 rounded"
-            >
-              Update Password
-            </button>
+<p className="
+text-sm
+text-slate-500
+break-all
+">
 
-          </div>
+{user.email}
 
-        </main>
+</p>
 
-      </div>
+<p className="
+text-xs
+text-slate-400
+mt-1
+">
 
-    </div>
-  )
+{user.role}
+
+</p>
+
+</div>
+
+</div>
+
+
+
+<div className="
+space-y-4
+">
+
+<input
+value={name}
+onChange={(e)=>
+setName(
+e.target.value
+)
+}
+placeholder="Name"
+className="
+w-full
+border
+rounded-lg
+p-3
+"
+/>
+
+
+<input
+value={department}
+onChange={(e)=>
+setDepartment(
+e.target.value
+)
+}
+placeholder="Department"
+className="
+w-full
+border
+rounded-lg
+p-3
+"
+/>
+
+
+<input
+value={phone}
+onChange={(e)=>
+setPhone(
+e.target.value
+)
+}
+placeholder="Phone"
+className="
+w-full
+border
+rounded-lg
+p-3
+"
+/>
+
+<button
+onClick={
+saveProfile
+}
+className="
+w-full
+sm:w-auto
+bg-blue-600
+text-white
+px-6
+py-3
+rounded-xl
+hover:bg-blue-700
+"
+>
+
+{
+saving
+?
+'Saving...'
+:
+'Save Profile'
+}
+
+</button>
+
+</div>
+
+</div>
+
+
+
+
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+shadow-sm
+">
+
+<div className="
+flex
+items-center
+gap-2
+mb-4
+">
+
+<Lock size={18}/>
+
+<h3 className="
+font-semibold
+">
+
+Change Password
+
+</h3>
+
+</div>
+
+
+<input
+type="password"
+value={newPassword}
+onChange={(e)=>
+setNewPassword(
+e.target.value
+)
+}
+placeholder="
+Minimum 8 characters
+"
+className="
+w-full
+border
+rounded-lg
+p-3
+"
+/>
+
+
+<button
+onClick={
+changePassword
+}
+className="
+mt-4
+w-full
+sm:w-auto
+bg-black
+text-white
+px-6
+py-3
+rounded-xl
+"
+>
+
+Update Password
+
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+</div>
+
+)
+
 }
