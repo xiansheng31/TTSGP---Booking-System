@@ -10,6 +10,8 @@ Settings,
 LogOut
 } from 'lucide-react'
 
+import { supabase } from '@/lib/supabase'
+
 interface NavbarProps{
 title:string
 }
@@ -20,6 +22,9 @@ title
 
 const [open,setOpen]=
 useState(false)
+
+const [unreadCount,setUnreadCount]=
+useState(0)
 
 const menuRef=
 useRef<HTMLDivElement>(null)
@@ -59,6 +64,53 @@ handleClick
 }
 
 },[])
+
+
+
+useEffect(()=>{
+
+loadUnread()
+
+},[])
+
+
+
+async function loadUnread(){
+
+const {data:userData}=
+await supabase
+.auth
+.getUser()
+
+if(!userData.user)return
+
+
+const {count}=await supabase
+.from(
+'notifications'
+)
+.select(
+'*',
+{
+count:'exact',
+head:true
+}
+)
+.eq(
+'user_id',
+userData.user.id
+)
+.eq(
+'read',
+false
+)
+
+setUnreadCount(
+count || 0
+)
+
+}
+
 
 
 return(
@@ -106,6 +158,7 @@ lg:ml-0
 </div>
 
 
+
 <div
 className="
 flex
@@ -134,17 +187,38 @@ hover:text-blue-600
 "
 />
 
+
+{unreadCount>0&&(
+
 <div
 className="
 absolute
-top-0
-right-0
-w-2
-h-2
+-top-1
+-right-1
+min-w-[14px]
+h-[14px]
+px-1
 bg-red-500
 rounded-full
+text-white
+text-[9px]
+flex
+items-center
+justify-center
 "
-/>
+>
+
+{
+
+unreadCount>9
+?'9+'
+:unreadCount
+
+}
+
+</div>
+
+)}
 
 </Link>
 
