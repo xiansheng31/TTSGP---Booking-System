@@ -118,6 +118,10 @@ userData.user.id
 'booking_date',
 today
 )
+.neq(
+'status',
+'cancelled'
+)
 
 if(upcoming){
 
