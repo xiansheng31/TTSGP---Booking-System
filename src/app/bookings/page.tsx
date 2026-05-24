@@ -7,98 +7,141 @@ import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
 export default function BookingsPage() {
-  const router = useRouter()
 
-  const [availableRooms,setAvailableRooms]=useState<any[]>([])
-  const [selectedDate,setSelectedDate]=useState('')
-  const [loading,setLoading]=useState(true)
+const router=useRouter()
 
-  useEffect(()=>{
+const [availableRooms,setAvailableRooms]=
+useState<any[]>([])
 
-    async function loadRooms(){
+const [selectedDate,setSelectedDate]=
+useState('')
 
-      const {data,error}=await supabase
-      .from('rooms')
-      .select('*')
-      .order('name')
-
-      console.log(data)
-      console.log(error)
-
-      if(data){
-
-        setAvailableRooms(data)
-
-      }
-
-      setLoading(false)
-
-    }
-
-    loadRooms()
-
-  },[])
+const [loading,setLoading]=
+useState(true)
 
 
-  async function checkAvailability(){
+useEffect(()=>{
 
-    if(!selectedDate){
+async function loadRooms(){
 
-      alert(
-        'Please select a date'
-      )
+const {data,error}=await supabase
+.from('rooms')
+.select('*')
+.order('name')
 
-      return
+console.log(data)
+console.log(error)
 
-    }
+if(data){
 
-    const {data,error}=await supabase
-    .from('rooms')
-    .select('*')
-    .eq(
-      'status',
-      'available'
-    )
-    .order('name')
+setAvailableRooms(data)
 
-    console.log(data)
-    console.log(error)
+}
 
-    if(data){
+setLoading(false)
 
-      setAvailableRooms(data)
+}
 
-    }
+loadRooms()
 
-  }
+},[])
 
 
-  return(
 
-<div className="flex h-screen overflow-hidden">
+async function checkAvailability(){
+
+if(!selectedDate){
+
+alert(
+'Please select a date'
+)
+
+return
+
+}
+
+
+const {data,error}=await supabase
+.from('rooms')
+.select('*')
+.eq(
+'status',
+'available'
+)
+.order(
+'name'
+)
+
+console.log(data)
+console.log(error)
+
+if(data){
+
+setAvailableRooms(data)
+
+}
+
+}
+
+
+
+return(
+
+<div className="
+min-h-screen
+bg-slate-100
+">
 
 <Sidebar/>
 
-<div className="flex-1 flex flex-col overflow-hidden">
 
-<Navbar title="Bookings"/>
+<div className="
+lg:ml-72
+min-h-screen
+flex
+flex-col
+">
 
-<main className="flex-1 overflow-y-auto p-6">
+<Navbar
+title="Bookings"
+/>
 
-<h1 className="text-3xl font-bold">
+
+<main className="
+flex-1
+p-4
+md:p-6
+overflow-x-hidden
+">
+
+<h1 className="
+text-2xl
+md:text-3xl
+font-bold
+">
 
 Bookings
 
 </h1>
 
-<p className="text-gray-500 mb-6">
+<p className="
+text-gray-500
+mb-6
+">
 
 Find and book available rooms
 
 </p>
 
 
-<div className="flex gap-4 mb-8">
+
+<div className="
+flex
+flex-col
+sm:flex-row
+gap-4
+mb-8
+">
 
 <input
 type="date"
@@ -109,27 +152,27 @@ e.target.value
 )
 }
 className="
+bg-white
 border
 rounded-lg
 px-4
-py-2
+py-3
 "
 />
 
-<button
 
+<button
 onClick={
 checkAvailability
 }
-
 className="
 bg-blue-600
 text-white
 px-6
+py-3
 rounded-lg
 hover:bg-blue-700
 "
-
 >
 
 Check Availability
@@ -137,6 +180,7 @@ Check Availability
 </button>
 
 </div>
+
 
 
 {loading&&(
@@ -150,8 +194,9 @@ Loading...
 )}
 
 
+
 {
-!loading &&
+!loading&&
 availableRooms.length===0&&(
 
 <p>
@@ -164,45 +209,51 @@ No rooms available
 }
 
 
-<div className="space-y-5">
+
+<div className="
+space-y-5
+">
 
 {
 availableRooms.map(room=>(
 
 <div
-
 key={room.id}
-
 className="
 bg-white
 border
 rounded-xl
 p-5
-flex
-gap-6
 shadow-sm
-"
 
+flex
+flex-col
+md:flex-row
+gap-5
+"
 >
 
 <img
-
 src={
 room.photo_url ||
 
 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=300'
 }
-
 className="
-w-44
-h-28
+w-full
+md:w-44
+h-48
+md:h-28
 rounded-lg
 object-cover
 "
-
 />
 
-<div className="flex-1">
+
+
+<div className="
+flex-1
+">
 
 <h2 className="
 font-bold
@@ -251,28 +302,24 @@ Location:
 </p>
 
 
+
 <div className="
 flex
 justify-end
-mt-4
+mt-5
 ">
 
 <button
-
 onClick={()=>
-
 router.push(
 `/room/${room.id}`
 )
-
 }
-
 className="
 text-blue-600
 font-medium
 hover:underline
 "
-
 >
 
 View Details
