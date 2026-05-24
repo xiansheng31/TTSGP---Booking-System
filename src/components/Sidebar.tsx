@@ -15,6 +15,7 @@ DoorOpen,
 Users,
 ClipboardList,
 BarChart3,
+Megaphone,
 LogOut,
 Menu,
 X
@@ -83,6 +84,12 @@ href:'/admin/booking-management'
 },
 
 {
+name:'Announcements',
+icon:Megaphone,
+href:'/admin/announcements'
+},
+
+{
 name:'Reports',
 icon:BarChart3,
 href:'/admin/reports'
@@ -94,7 +101,7 @@ return(
 
 <>
 
-{/* mobile button */}
+{/* Mobile menu button */}
 
 <button
 onClick={()=>setOpen(true)}
@@ -107,7 +114,7 @@ z-50
 bg-white
 p-2
 rounded-lg
-shadow
+shadow-md
 "
 >
 
@@ -116,6 +123,7 @@ shadow
 </button>
 
 
+{/* overlay */}
 
 {open&&(
 
@@ -124,14 +132,13 @@ onClick={()=>setOpen(false)}
 className="
 fixed
 inset-0
-bg-black/40
+bg-black/50
 z-40
 lg:hidden
 "
 />
 
 )}
-
 
 
 <div
@@ -144,35 +151,42 @@ w-72
 bg-[#02122c]
 text-white
 z-50
-transform
-transition-transform
-duration-300
 flex
 flex-col
+transition-transform
+duration-300
 
-${open
+${
+open
 ?'translate-x-0'
 :'-translate-x-full lg:translate-x-0'
 }
 `}
 >
 
-<div className="
+{/* logo */}
+
+<div
+className="
 h-24
-px-8
 flex
 items-center
 justify-between
+px-8
 border-b
 border-white/10
-">
+"
+>
 
-<h1 className="
+<h1
+className="
 font-bold
 text-3xl
-">
+"
+>
 
 TTSGP
+
 <span className="text-blue-400">
 Booking
 </span>
@@ -193,13 +207,17 @@ className="lg:hidden"
 
 
 
-<div className="
+{/* menu */}
+
+<div
+className="
 flex-1
 overflow-y-auto
-py-6
 px-4
+py-6
 space-y-2
-">
+"
+>
 
 {menu.map(item=>{
 
@@ -223,7 +241,8 @@ py-4
 rounded-2xl
 transition
 
-${active
+${
+active
 ?'bg-blue-600'
 :'hover:bg-white/10'
 }
@@ -248,11 +267,15 @@ ${active
 
 
 
-<div className="
+{/* bottom */}
+
+<div
+className="
 border-t
 border-white/10
 p-5
-">
+"
+>
 
 <button
 className="
