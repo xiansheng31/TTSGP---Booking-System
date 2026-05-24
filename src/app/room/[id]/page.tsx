@@ -6,261 +6,228 @@ import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
-export default function RoomDetailsPage() {
-  const { id } = useParams()
+export default function RoomDetailsPage(){
 
-  const [room, setRoom] = useState<any>(null)
-  const [bookings, setBookings] = useState<any[]>([])
+const {id}=useParams()
 
-  const [selectedDate, setSelectedDate] =
-    useState(
-      new Date()
-        .toISOString()
-        .split('T')[0]
-    )
+const [room,setRoom]=useState<any>(null)
+const [bookings,setBookings]=useState<any[]>([])
 
-  const [start, setStart] = useState('')
-  const [end, setEnd] = useState('')
+const [selectedDate,setSelectedDate]=useState(
+new Date()
+.toISOString()
+.split('T')[0]
+)
 
-  const [title, setTitle] =
-    useState('')
+const [start,setStart]=useState('')
+const [end,setEnd]=useState('')
+const [title,setTitle]=useState('')
+const [description,setDescription]=useState('')
 
-  const [description, setDescription] =
-    useState('')
+useEffect(()=>{
 
-  useEffect(() => {
-    loadRoom()
-    loadBookings()
-  }, [id, selectedDate])
+loadRoom()
+loadBookings()
 
-  async function loadRoom() {
+},[id,selectedDate])
 
-    const { data, error } =
-      await supabase
-      .from('rooms')
-      .select('*')
-      .eq('id', id)
-      .single()
 
-    if (error) {
-      console.log(
-        'ROOM ERROR:',
-        error
-      )
-      return
-    }
+async function loadRoom(){
 
-    setRoom(data)
-  }
+const {data,error}=await supabase
+.from('rooms')
+.select('*')
+.eq('id',id)
+.single()
 
-  async function loadBookings() {
+if(error){
 
-    const { data, error } =
-      await supabase
-      .from('bookings')
-      .select('*')
-      .eq(
-        'room_id',
-        id
-      )
-      .eq(
-        'booking_date',
-        selectedDate
-      )
+console.log(error)
+return
 
-    if (error) {
+}
 
-      console.log(
-        'BOOKING LOAD ERROR:',
-        error
-      )
+setRoom(data)
 
-      return
-    }
+}
 
-    setBookings(data || [])
-  }
 
-  const slots = [
-    '09:00',
-    '09:30',
-    '10:00',
-    '10:30',
-    '11:00',
-    '11:30',
-    '12:00',
-    '12:30',
-    '13:00',
-    '13:30',
-    '14:00',
-    '14:30',
-    '15:00',
-    '15:30',
-    '16:00',
-    '16:30',
-    '17:00'
-  ]
+async function loadBookings(){
 
-  function isBooked(
-    time:string
-  ){
+const {data,error}=await supabase
+.from('bookings')
+.select('*')
+.eq('room_id',id)
+.eq(
+'booking_date',
+selectedDate
+)
 
-    return bookings.some(
+if(error){
 
-      booking =>
+console.log(error)
+return
 
-      time >= booking.start_time &&
+}
 
-      time < booking.end_time
+setBookings(data||[])
 
-    )
+}
 
-  }
 
-  async function confirmBooking(){
+const slots=[
 
-    if(!start){
-      alert(
-        'Please select start time'
-      )
-      return
-    }
+'09:00',
+'09:30',
+'10:00',
+'10:30',
+'11:00',
+'11:30',
+'12:00',
+'12:30',
+'13:00',
+'13:30',
+'14:00',
+'14:30',
+'15:00',
+'15:30',
+'16:00',
+'16:30',
+'17:00'
 
-    if(!end){
-      alert(
-        'Please select end time'
-      )
-      return
-    }
+]
 
-    const confirmBox =
-      window.confirm(
 
-`Confirm Booking?
+function isBooked(time:string){
 
-Room: ${room.name}
+return bookings.some(
 
-Date: ${selectedDate}
+booking=>
 
-Start: ${start}
+time>=booking.start_time &&
 
-End: ${end}`
+time<booking.end_time
 
 )
 
-    if(!confirmBox){
-      return
-    }
+}
 
-    const {
-      data:{user}
-    }=
-    await supabase
-    .auth
-    .getUser()
 
-    if(!user){
+async function confirmBooking(){
 
-      alert(
-        'Please login'
-      )
+if(!start){
 
-      return
-    }
+alert(
+'Please select start time'
+)
 
-    const { error } =
-      await supabase
-      .from('bookings')
-      .insert({
+return
 
-        room_id:id,
+}
 
-        user_id:user.id,
+if(!end){
 
-        title,
+alert(
+'Please select end time'
+)
 
-        description,
+return
 
-        booking_date:
-        selectedDate,
+}
 
-        start_time:
-        start,
+const {data:{user}}=
+await supabase
+.auth
+.getUser()
 
-        end_time:
-        end,
+if(!user){
 
-        status:
-        'pending'
+alert('Please login')
+return
 
-      })
+}
 
-    if(error){
+const {error}=await supabase
+.from('bookings')
+.insert({
 
-      console.log(
-        'BOOKING ERROR:',
-        error
-      )
+room_id:id,
+user_id:user.id,
+title,
+description,
+booking_date:selectedDate,
+start_time:start,
+end_time:end,
+status:'pending'
 
-      alert(
-        error.message
-      )
+})
 
-      return
+if(error){
 
-    }
+alert(error.message)
+return
 
-    alert(
-      'Booking successful'
-    )
+}
 
-    await loadBookings()
+alert(
+'Booking successful'
+)
 
-    setStart('')
-    setEnd('')
-    setTitle('')
-    setDescription('')
-  }
+loadBookings()
 
-  if(!room){
+setStart('')
+setEnd('')
+setTitle('')
+setDescription('')
 
-    return(
-      <p>
-        Loading...
-      </p>
-    )
+}
 
-  }
 
-  return(
+if(!room){
 
-<div className="flex h-screen overflow-hidden">
+return(
+<div className="p-10">
+Loading...
+</div>
+)
+
+}
+
+
+return(
+
+<div className="min-h-screen bg-slate-100">
 
 <Sidebar/>
 
-<div className="flex-1 flex flex-col overflow-hidden">
+<div className="lg:ml-72 flex flex-col min-h-screen">
 
 <Navbar title={room.name}/>
 
-<main className="flex-1 overflow-y-auto p-6">
+<main className="p-4 md:p-6">
 
 <div className="
 grid
-grid-cols-3
-gap-8
+grid-cols-1
+xl:grid-cols-3
+gap-6
 ">
 
-<div className="col-span-2">
+<div className="
+xl:col-span-2
+space-y-6
+">
 
 <div className="
 bg-white
-border
 rounded-xl
-p-8
+border
+p-6
 ">
 
 <h1 className="
-text-4xl
+text-2xl
+md:text-4xl
 font-bold
 mb-6
 ">
@@ -269,31 +236,61 @@ mb-6
 
 </h1>
 
-<p>Type: {room.type}</p>
-<p>Capacity: {room.capacity}</p>
-<p>Floor: {room.floor}</p>
-<p>Location: {room.location}</p>
+<div className="
+grid
+grid-cols-2
+gap-4
+text-sm
+">
+
+<p>
+Type:
+{' '}
+{room.type}
+</p>
+
+<p>
+Capacity:
+{' '}
+{room.capacity}
+</p>
+
+<p>
+Floor:
+{' '}
+{room.floor}
+</p>
+
+<p>
+Location:
+{' '}
+{room.location}
+</p>
+
+</div>
 
 </div>
 
 
 <div className="
 bg-white
-border
 rounded-xl
-p-8
-mt-8
+border
+p-6
 ">
 
 <div className="
 flex
+flex-col
+md:flex-row
 justify-between
+gap-4
 mb-6
 ">
 
 <h2 className="
 font-bold
-text-2xl
+text-xl
 ">
 
 Availability
@@ -306,11 +303,13 @@ value={selectedDate}
 onChange={(e)=>
 setSelectedDate(
 e.target.value
-)}
+)
+}
 className="
 border
-rounded
-p-2
+rounded-lg
+px-4
+py-2
 "
 />
 
@@ -319,7 +318,8 @@ p-2
 
 <div className="
 grid
-grid-cols-3
+grid-cols-2
+md:grid-cols-3
 gap-4
 ">
 
@@ -331,33 +331,28 @@ isBooked(time)
 return(
 
 <button
-
 key={time}
-
 disabled={booked}
-
 onClick={()=>{
-
 setStart(time)
-
 setEnd('')
-
 }}
-
 className={`
+
 p-4
 rounded-xl
 font-medium
+transition
 
 ${
 booked
-? 'bg-gray-300 text-gray-500'
-: start===time
-? 'bg-blue-600 text-white'
-: 'bg-green-100 text-green-700'
+?'bg-gray-300 text-gray-500'
+:start===time
+?'bg-blue-600 text-white'
+:'bg-green-100 text-green-700'
 }
-`}
 
+`}
 >
 
 {time}
@@ -376,7 +371,7 @@ mt-6
 ">
 
 <p className="
-font-bold
+font-semibold
 mb-2
 ">
 
@@ -403,10 +398,10 @@ Select end time
 </option>
 
 {
+
 slots
 .filter(
-slot=>
-slot>start
+slot=>slot>start
 )
 .map(slot=>(
 
@@ -414,10 +409,13 @@ slot>start
 key={slot}
 value={slot}
 >
+
 {slot}
+
 </option>
 
 ))
+
 }
 
 </select>
@@ -429,11 +427,12 @@ value={slot}
 </div>
 
 
+
 <div className="
 bg-white
-border
 rounded-xl
-p-8
+border
+p-6
 h-fit
 ">
 
@@ -447,19 +446,15 @@ Book Room
 
 </h2>
 
+
 <input
-
-placeholder="
-Meeting title
-"
-
+placeholder="Meeting title"
 value={title}
-
 onChange={(e)=>
 setTitle(
 e.target.value
-)}
-
+)
+}
 className="
 border
 w-full
@@ -469,19 +464,15 @@ mb-4
 "
 />
 
+
 <textarea
-
-placeholder="
-Description
-"
-
+placeholder="Description"
 value={description}
-
 onChange={(e)=>
 setDescription(
 e.target.value
-)}
-
+)
+}
 className="
 border
 w-full
@@ -492,11 +483,15 @@ mb-4
 "
 />
 
+
 <p>
+
 Date:
 {' '}
 {selectedDate}
+
 </p>
+
 
 <div className="
 mt-4
@@ -511,9 +506,10 @@ Selected Start:
 
 {' '}
 
-{start || 'Not selected'}
+{start||'Not selected'}
 
 </p>
+
 
 <p>
 
@@ -523,7 +519,7 @@ Selected End:
 
 {' '}
 
-{end || 'Not selected'}
+{end||'Not selected'}
 
 </p>
 
@@ -531,11 +527,7 @@ Selected End:
 
 
 <button
-
-onClick={
-confirmBooking
-}
-
+onClick={confirmBooking}
 className="
 w-full
 mt-6
@@ -543,8 +535,8 @@ py-4
 rounded-xl
 bg-blue-600
 text-white
+hover:bg-blue-700
 "
-
 >
 
 Confirm Booking
