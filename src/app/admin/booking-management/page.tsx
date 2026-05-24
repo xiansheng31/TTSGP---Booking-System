@@ -5,9 +5,9 @@ import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import {
 Search,
-Check,
 X
 } from 'lucide-react'
+
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -297,10 +297,6 @@ bg-white
 All Statuses
 </option>
 
-<option value="pending">
-Pending
-</option>
-
 <option value="approved">
 Approved
 </option>
@@ -421,38 +417,14 @@ capitalize
 
 </td>
 
-<td className="
-p-4
-">
+<td className="p-4">
 
 <div className="
 flex
 gap-2
 ">
 
-{b.status==='pending'&&(
-
-<button
-onClick={()=>
-updateStatus(
-b.id,
-'approved'
-)
-}
-className="
-bg-green-600
-text-white
-p-2
-rounded
-"
->
-
-<Check size={14}/>
-
-</button>
-
-)}
-
+{b.status!=='cancelled'&&(
 
 <button
 onClick={()=>
@@ -472,6 +444,8 @@ rounded
 <X size={14}/>
 
 </button>
+
+)}
 
 </div>
 
