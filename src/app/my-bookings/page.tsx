@@ -1,44 +1,44 @@
 'use client'
 
-import { useEffect,useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
-export default function MyBookingsPage(){
+export default function MyBookingsPage() {
 
-const router=useRouter()
+const router = useRouter()
 
-const [tab,setTab]=
-useState<'upcoming'|'history'>(
+const [tab, setTab] =
+useState<'upcoming' | 'history'>(
 'upcoming'
 )
 
-const [bookings,setBookings]=
+const [bookings, setBookings] =
 useState<any[]>([])
 
-const [loading,setLoading]=
+const [loading, setLoading] =
 useState(true)
 
 
-useEffect(()=>{
+useEffect(() => {
 
 loadBookings()
 
-},[])
+}, [])
 
 
 
-async function loadBookings(){
+async function loadBookings() {
 
 const {
-data:{user}
-}=await supabase
+data: { user }
+} = await supabase
 .auth
 .getUser()
 
-if(!user){
+if (!user) {
 
 setLoading(false)
 
@@ -47,7 +47,7 @@ return
 }
 
 
-const {data,error}=await supabase
+const { data, error } = await supabase
 .from('bookings')
 .select(`
 *,
@@ -62,14 +62,14 @@ user.id
 .order(
 'booking_date',
 {
-ascending:true
+ascending: true
 }
 )
 
 console.log(data)
 console.log(error)
 
-if(data){
+if (data) {
 
 setBookings(data)
 
@@ -81,33 +81,31 @@ setLoading(false)
 
 
 
-const today=
-new Date()
-.toISOString()
-.split('T')[0]
+const now = new Date()
 
+const filtered = bookings.filter((b) => {
 
-const filtered=
+const bookingEnd = new Date(
+`${b.booking_date}T${b.end_time}`
+)
 
-bookings.filter(b=>{
+if (tab === 'upcoming') {
 
-if(tab==='upcoming'){
+return (
 
-return(
+bookingEnd > now &&
 
-b.booking_date>=today &&
-
-b.status!=='cancelled'
+b.status !== 'cancelled'
 
 )
 
 }
 
-return(
+return (
 
-b.booking_date<today ||
+bookingEnd <= now ||
 
-b.status==='cancelled'
+b.status === 'cancelled'
 
 )
 
@@ -115,14 +113,14 @@ b.status==='cancelled'
 
 
 
-return(
+return (
 
 <div className="
 min-h-screen
 bg-slate-100
 ">
 
-<Sidebar/>
+<Sidebar />
 
 <div className="
 lg:ml-72
@@ -147,7 +145,7 @@ gap-3
 ">
 
 <button
-onClick={()=>
+onClick={() =>
 setTab(
 'upcoming'
 )
@@ -159,9 +157,11 @@ py-3
 rounded-xl
 
 ${
-tab==='upcoming'
-?'bg-blue-600 text-white'
-:'bg-white border'
+
+tab === 'upcoming'
+? 'bg-blue-600 text-white'
+: 'bg-white border'
+
 }
 
 `}
@@ -173,7 +173,7 @@ Upcoming
 
 
 <button
-onClick={()=>
+onClick={() =>
 setTab(
 'history'
 )
@@ -185,9 +185,11 @@ py-3
 rounded-xl
 
 ${
-tab==='history'
-?'bg-blue-600 text-white'
-:'bg-white border'
+
+tab === 'history'
+? 'bg-blue-600 text-white'
+: 'bg-white border'
+
 }
 
 `}
@@ -208,7 +210,7 @@ font-bold
 
 {
 
-tab==='upcoming'
+tab === 'upcoming'
 
 ?
 
@@ -231,7 +233,7 @@ border
 p-6
 ">
 
-{loading&&(
+{loading && (
 
 <p>
 
@@ -247,7 +249,7 @@ Loading...
 
 !loading &&
 
-filtered.length===0&&(
+filtered.length === 0 && (
 
 <div className="
 text-center
@@ -265,7 +267,7 @@ No bookings yet
 
 
 <button
-onClick={()=>
+onClick={() =>
 router.push(
 '/bookings'
 )
@@ -295,7 +297,7 @@ space-y-4
 
 {
 
-filtered.map(b=>(
+filtered.map(b => (
 
 <div
 key={b.id}
@@ -339,7 +341,6 @@ Date:
 Time:
 {' '}
 {b.start_time}
-
 -
 {b.end_time}
 
@@ -358,16 +359,18 @@ py-1
 rounded-full
 
 ${
-b.status==='approved'
-?'bg-green-100 text-green-700'
 
-:b.status==='pending'
-?'bg-yellow-100 text-yellow-700'
+b.status === 'approved'
+? 'bg-green-100 text-green-700'
 
-:b.status==='cancelled'
-?'bg-red-100 text-red-700'
+: b.status === 'pending'
+? 'bg-yellow-100 text-yellow-700'
 
-:'bg-gray-100'
+: b.status === 'cancelled'
+? 'bg-red-100 text-red-700'
+
+: 'bg-gray-100'
+
 }
 
 `}>
