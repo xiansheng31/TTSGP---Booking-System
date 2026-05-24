@@ -19,12 +19,13 @@ top-0
 z-30
 bg-white
 border-b
-h-16
+h-20
 px-4
-lg:px-6
+md:px-6
 flex
 items-center
 justify-between
+shadow-sm
 "
 >
 
@@ -39,10 +40,10 @@ min-w-0
 <h1
 className="
 font-semibold
-text-lg
-lg:text-2xl
+text-xl
+md:text-2xl
 truncate
-ml-12
+ml-14
 lg:ml-0
 "
 >
@@ -65,7 +66,12 @@ shrink-0
 
 <div className="relative">
 
-<Bell size={22}/>
+<Bell
+size={22}
+className="
+text-slate-600
+"
+/>
 
 <div
 className="
@@ -93,6 +99,7 @@ flex
 items-center
 justify-center
 font-semibold
+shadow
 "
 >
 
