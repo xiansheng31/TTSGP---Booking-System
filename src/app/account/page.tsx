@@ -40,6 +40,7 @@ user:authUser
 .auth
 .getUser()
 
+
 if(!authUser)return
 
 
@@ -52,15 +53,17 @@ authUser.id
 )
 .single()
 
+
 console.log(data)
 console.log(error)
+
 
 if(data){
 
 setUser(data)
 
 setEmail(
-data.email || ''
+authUser.email || ''
 )
 
 setPhone(
@@ -100,7 +103,35 @@ return
 }
 
 
-const {error}=await supabase
+
+const {error:authError}=
+
+await supabase
+.auth
+.updateUser({
+
+email
+
+})
+
+
+if(authError){
+
+toast.error(
+authError.message
+)
+
+setSaving(false)
+
+return
+
+}
+
+
+
+const {error}=
+
+await supabase
 .from('users')
 .update({
 
@@ -114,7 +145,9 @@ authUser.id
 )
 
 
+
 setSaving(false)
+
 
 
 if(error){
@@ -278,7 +311,7 @@ text-slate-500
 break-all
 ">
 
-{user.email}
+{email}
 
 </p>
 
