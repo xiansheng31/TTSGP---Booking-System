@@ -26,6 +26,9 @@ useState(false)
 const [unreadCount,setUnreadCount]=
 useState(0)
 
+const [profile,setProfile]=
+useState<any>(null)
+
 const menuRef=
 useRef<HTMLDivElement>(null)
 
@@ -71,8 +74,43 @@ handleClick
 useEffect(()=>{
 
 loadUnread()
+loadProfile()
 
 },[])
+
+
+
+async function loadProfile(){
+
+const {
+data:{user}
+}=await supabase
+.auth
+.getUser()
+
+if(!user)return
+
+
+const {data,error}=await supabase
+.from('users')
+.select('*')
+.eq(
+'id',
+user.id
+)
+.single()
+
+
+console.log(data)
+console.log(error)
+
+if(data){
+
+setProfile(data)
+
+}
+
+}
 
 
 
@@ -96,12 +134,6 @@ error
 )
 .select(
 'id,read,user_id'
-)
-
-
-console.log(
-'notifications:',
-data
 )
 
 
@@ -131,6 +163,18 @@ n.read===false
 setUnreadCount(
 unread.length
 )
+
+}
+
+
+
+async function logout(){
+
+await supabase
+.auth
+.signOut()
+
+window.location.href='/'
 
 }
 
@@ -268,7 +312,18 @@ shadow
 "
 >
 
-X
+{
+profile?.name
+?.substring(
+0,
+1
+)
+.toUpperCase()
+
+||
+
+'X'
+}
 
 </button>
 
@@ -299,7 +354,11 @@ border-b
 
 <p className="font-semibold">
 
-Xian Sheng
+{
+profile?.name
+||
+'Loading...'
+}
 
 </p>
 
@@ -307,10 +366,19 @@ Xian Sheng
 className="
 text-sm
 text-gray-500
+capitalize
 "
 >
 
-Administrator
+{
+profile?.role
+?.replace(
+'_',
+' '
+)
+||
+'User'
+}
 
 </p>
 
@@ -359,6 +427,7 @@ Settings
 
 
 <button
+onClick={logout}
 className="
 w-full
 flex
