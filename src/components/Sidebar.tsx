@@ -1,8 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+Menu,
+X,
 Home,
 Calendar,
 BookOpen,
@@ -12,156 +15,117 @@ LayoutDashboard,
 DoorOpen,
 Users,
 ClipboardList,
-BarChart2,
+BarChart3,
 Settings,
-LogOut,
-ChevronLeft,
-ChevronRight,
-Menu,
-X
+LogOut
 } from 'lucide-react'
 
-import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+const menuItems=[
+
+{
+name:'Home',
+icon:Home,
+href:'/home'
+},
+
+{
+name:'Book a Room',
+icon:Calendar,
+href:'/bookings'
+},
+
+{
+name:'My Bookings',
+icon:BookOpen,
+href:'/my-bookings'
+},
+
+{
+name:'Notifications',
+icon:Bell,
+href:'/notifications'
+},
+
+{
+name:'My Account',
+icon:User,
+href:'/my-account'
+},
+
+{
+name:'Dashboard',
+icon:LayoutDashboard,
+href:'/admin/dashboard'
+},
+
+{
+name:'Rooms',
+icon:DoorOpen,
+href:'/admin/rooms'
+},
+
+{
+name:'Users',
+icon:Users,
+href:'/admin/users'
+},
+
+{
+name:'Bookings',
+icon:ClipboardList,
+href:'/admin/booking-management'
+},
+
+{
+name:'Reports',
+icon:BarChart3,
+href:'/admin/reports'
+},
+
+{
+name:'Settings',
+icon:Settings,
+href:'/admin/settings'
+}
+
+]
 
 export default function Sidebar(){
 
 const pathname=usePathname()
 
-const [collapsed,setCollapsed]=
-useState(false)
-
-const [mobileOpen,setMobileOpen]=
-useState(false)
-
-async function logout(){
-
-await supabase.auth.signOut()
-
-window.location.href='/login'
-
-}
-
-const navItems=[
-
-{
-href:'/home',
-label:'Home',
-icon:Home
-},
-
-{
-href:'/bookings',
-label:'Book a Room',
-icon:Calendar
-},
-
-{
-href:'/my-bookings',
-label:'My Bookings',
-icon:BookOpen
-},
-
-{
-href:'/notifications',
-label:'Notifications',
-icon:Bell
-},
-
-{
-href:'/account',
-label:'My Account',
-icon:User
-},
-
-{
-href:'/admin/dashboard',
-label:'Dashboard',
-icon:LayoutDashboard
-},
-
-{
-href:'/admin/rooms',
-label:'Rooms',
-icon:DoorOpen
-},
-
-{
-href:'/admin/users',
-label:'Users',
-icon:Users
-},
-
-{
-href:'/admin/booking-management',
-label:'Bookings',
-icon:ClipboardList
-},
-
-{
-href:'/admin/reports',
-label:'Reports',
-icon:BarChart2
-},
-
-{
-href:'/admin/settings',
-label:'Settings',
-icon:Settings
-}
-
-]
+const [open,setOpen]=useState(false)
 
 return(
 
 <>
 
 <button
-onClick={()=>
-setMobileOpen(
-!mobileOpen
-)
-}
+onClick={()=>setOpen(true)}
 className="
+lg:hidden
 fixed
-top-4
+top-5
 left-4
 z-50
-lg:hidden
 bg-white
+p-2
 rounded-lg
 shadow
-p-2
 "
 >
-
-{
-
-mobileOpen
-
-?
-
-<X size={20}/>
-
-:
-
-<Menu size={20}/>
-
-}
-
+<Menu size={22}/>
 </button>
 
 
-{mobileOpen&&(
+{open&&(
 
 <div
-onClick={()=>
-setMobileOpen(false)
-}
+onClick={()=>setOpen(false)}
 className="
 fixed
 inset-0
-bg-black/50
+bg-black/40
 z-40
 lg:hidden
 "
@@ -170,113 +134,55 @@ lg:hidden
 )}
 
 
-<aside
+<div
 className={`
-
 fixed
 top-0
 left-0
-z-50
-h-screen
-bg-[#0f172a]
+h-full
+w-72
+bg-[#07152d]
 text-white
-transition-all
+z-50
+transform
+transition-transform
 duration-300
 
-${
+${open?'translate-x-0':'-translate-x-full'}
 
-mobileOpen
-?
-'translate-x-0'
-:
-'-translate-x-full lg:translate-x-0'
-
-}
-
-${
-
-collapsed
-?
-'w-[80px]'
-:
-'w-[260px]'
-
-}
-
+lg:translate-x-0
+lg:static
+lg:w-72
 `}
 >
 
-<div
-className="
-h-16
-border-b
-px-5
+<div className="
 flex
-items-center
 justify-between
-"
->
+items-center
+p-6
+border-b
+border-slate-800
+">
 
-{
-
-!collapsed&&(
-
-<div>
-
-<span
-className="
+<h1 className="
 font-bold
-text-white
-"
->
+text-2xl
+">
 
-TTSGP
+TTSGP Booking
 
-</span>
-
-<span
-className="
-text-blue-400
-font-bold
-ml-1
-"
->
-
-Booking
-
-</span>
-
-</div>
-
-)
-
-}
+</h1>
 
 
 <button
-onClick={()=>
-setCollapsed(
-!collapsed
-)
-}
+onClick={()=>setOpen(false)}
 className="
-hidden
-lg:block
+lg:hidden
 "
 >
 
-{
-
-collapsed
-?
-
-<ChevronRight size={18}/>
-
-:
-
-<ChevronLeft size={18}/>
-
-}
+<X/>
 
 </button>
 
@@ -284,135 +190,78 @@ collapsed
 
 
 
-<div
-className="
-p-3
-space-y-2
-overflow-y-auto
-h-[calc(100vh-120px)]
-"
->
+<div className="p-4 space-y-2">
 
-{
-
-navItems.map(item=>{
+{menuItems.map(item=>{
 
 const Icon=item.icon
 
 const active=
-
 pathname===item.href
 
 return(
 
 <Link
-key={item.href}
+key={item.name}
 href={item.href}
-onClick={()=>
-setMobileOpen(
-false
-)
-}
+onClick={()=>setOpen(false)}
 className={`
-
 flex
 items-center
 gap-3
-px-3
+px-4
 py-3
-rounded-lg
-text-sm
+rounded-xl
 
-${
-
-active
-
-?
-
-'bg-blue-600'
-
-:
-
-'hover:bg-slate-800'
-
+${active
+?'bg-blue-600'
+:'hover:bg-slate-800'
 }
-
 `}
 >
 
 <Icon size={18}/>
 
-{
-
-!collapsed&&(
-
-<span>
-
-{item.label}
-
-</span>
-
-)
-
-}
+{item.name}
 
 </Link>
 
 )
 
-})
-
-}
+})}
 
 </div>
 
 
-
-<div
-className="
+<div className="
 absolute
-bottom-4
-left-0
-right-0
-px-3
-"
->
+bottom-6
+left-4
+right-4
+">
 
 <button
-onClick={logout}
 className="
 w-full
 flex
 items-center
 gap-3
-px-3
+px-4
 py-3
-rounded-lg
+rounded-xl
 hover:bg-slate-800
 "
 >
 
 <LogOut size={18}/>
 
-{
-
-!collapsed&&(
-
-<span>
-
 Logout
-
-</span>
-
-)
-
-}
 
 </button>
 
 </div>
 
-</aside>
+</div>
 
 </>
 
