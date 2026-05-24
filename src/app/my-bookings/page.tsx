@@ -47,12 +47,6 @@ return
 }
 
 
-const today=
-new Date()
-.toISOString()
-.split('T')[0]
-
-
 const {data,error}=await supabase
 .from('bookings')
 .select(`
@@ -87,23 +81,37 @@ setLoading(false)
 
 
 
+const today=
+new Date()
+.toISOString()
+.split('T')[0]
+
+
 const filtered=
 
-bookings.filter(b=>
+bookings.filter(b=>{
 
-tab==='upcoming'
+if(tab==='upcoming'){
 
-? b.booking_date>=
-new Date()
-.toISOString()
-.split('T')[0]
+return(
 
-: b.booking_date<
-new Date()
-.toISOString()
-.split('T')[0]
+b.booking_date>=today &&
+
+b.status!=='cancelled'
 
 )
+
+}
+
+return(
+
+b.booking_date<today ||
+
+b.status==='cancelled'
+
+)
+
+})
 
 
 
@@ -266,6 +274,7 @@ className="
 text-blue-600
 font-medium
 "
+
 >
 
 Book a room →
@@ -342,14 +351,26 @@ Time:
 Status:
 {' '}
 
-<span className="
-bg-gray-100
+<span className={`
+
 px-3
 py-1
 rounded-full
-"
 
->
+${
+b.status==='approved'
+?'bg-green-100 text-green-700'
+
+:b.status==='pending'
+?'bg-yellow-100 text-yellow-700'
+
+:b.status==='cancelled'
+?'bg-red-100 text-red-700'
+
+:'bg-gray-100'
+}
+
+`}>
 
 {b.status}
 
