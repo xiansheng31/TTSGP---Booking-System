@@ -1,12 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
 import {
-Menu,
-X,
 Home,
 Calendar,
 BookOpen,
@@ -17,8 +15,9 @@ DoorOpen,
 Users,
 ClipboardList,
 BarChart3,
-Settings,
-LogOut
+LogOut,
+Menu,
+X
 } from 'lucide-react'
 
 export default function Sidebar(){
@@ -27,72 +26,66 @@ const pathname=usePathname()
 
 const [open,setOpen]=useState(false)
 
-const menuItems=[
+const menu=[
 
 {
 name:'Home',
-href:'/home',
-icon:Home
+icon:Home,
+href:'/home'
 },
 
 {
 name:'Book a Room',
-href:'/bookings',
-icon:Calendar
+icon:Calendar,
+href:'/bookings'
 },
 
 {
 name:'My Bookings',
-href:'/my-bookings',
-icon:BookOpen
+icon:BookOpen,
+href:'/my-bookings'
 },
 
 {
 name:'Notifications',
-href:'/notifications',
-icon:Bell
+icon:Bell,
+href:'/notifications'
 },
 
 {
 name:'My Account',
-href:'/my-account',
-icon:User
+icon:User,
+href:'/account'
 },
 
 {
 name:'Dashboard',
-href:'/admin/dashboard',
-icon:LayoutDashboard
+icon:LayoutDashboard,
+href:'/admin/dashboard'
 },
 
 {
 name:'Rooms',
-href:'/admin/rooms',
-icon:DoorOpen
+icon:DoorOpen,
+href:'/admin/rooms'
 },
 
 {
 name:'Users',
-href:'/admin/users',
-icon:Users
+icon:Users,
+href:'/admin/users'
 },
 
 {
 name:'Bookings',
-href:'/admin/booking-management',
-icon:ClipboardList
+icon:ClipboardList,
+href:'/admin/booking-management'
 },
 
 {
 name:'Reports',
-href:'/admin/reports',
-icon:BarChart3
-},
-
-{
-name:'Settings',
-href:'/admin/settings',
-icon:Settings
+icon:BarChart3,
+href:'/admin/reports'
 }
 
 ]
@@ -101,6 +94,8 @@ return(
 
 <>
 
+{/* mobile button */}
+
 <button
 onClick={()=>setOpen(true)}
 className="
@@ -108,17 +103,18 @@ lg:hidden
 fixed
 top-4
 left-4
-z-[60]
+z-50
 bg-white
-shadow-md
-rounded-lg
 p-2
+rounded-lg
+shadow
 "
 >
 
-<Menu size={20}/>
+<Menu size={22}/>
 
 </button>
+
 
 
 {open&&(
@@ -128,7 +124,7 @@ onClick={()=>setOpen(false)}
 className="
 fixed
 inset-0
-bg-black/50
+bg-black/40
 z-40
 lg:hidden
 "
@@ -137,35 +133,38 @@ lg:hidden
 )}
 
 
-<aside
+
+<div
 className={`
 fixed
 top-0
 left-0
 h-screen
 w-72
-bg-[#07152d]
+bg-[#02122c]
 text-white
 z-50
+transform
 transition-transform
 duration-300
+flex
+flex-col
 
 ${open
 ?'translate-x-0'
-:'-translate-x-full'
+:'-translate-x-full lg:translate-x-0'
 }
-
-lg:translate-x-0
 `}
 >
 
 <div className="
+h-24
+px-8
 flex
 items-center
 justify-between
-p-6
 border-b
-border-slate-800
+border-white/10
 ">
 
 <h1 className="
@@ -175,7 +174,7 @@ text-3xl
 
 TTSGP
 <span className="text-blue-400">
- Booking
+Booking
 </span>
 
 </h1>
@@ -195,14 +194,14 @@ className="lg:hidden"
 
 
 <div className="
-px-4
-py-6
-space-y-2
+flex-1
 overflow-y-auto
-h-[calc(100vh-130px)]
+py-6
+px-4
+space-y-2
 ">
 
-{menuItems.map(item=>{
+{menu.map(item=>{
 
 const Icon=item.icon
 
@@ -212,28 +211,32 @@ pathname===item.href
 return(
 
 <Link
-key={item.name}
+key={item.href}
 href={item.href}
 onClick={()=>setOpen(false)}
 className={`
 flex
 items-center
-gap-3
-px-4
-py-3
-rounded-xl
+gap-4
+px-5
+py-4
+rounded-2xl
 transition
 
 ${active
 ?'bg-blue-600'
-:'hover:bg-slate-800'
+:'hover:bg-white/10'
 }
 `}
 >
 
-<Icon size={18}/>
+<Icon size={22}/>
+
+<span>
 
 {item.name}
+
+</span>
 
 </Link>
 
@@ -244,11 +247,11 @@ ${active
 </div>
 
 
+
 <div className="
-absolute
-bottom-6
-left-4
-right-4
+border-t
+border-white/10
+p-5
 ">
 
 <button
@@ -257,14 +260,11 @@ w-full
 flex
 items-center
 gap-3
-px-4
-py-3
-rounded-xl
-hover:bg-slate-800
+hover:text-red-300
 "
 >
 
-<LogOut size={18}/>
+<LogOut/>
 
 Logout
 
@@ -272,7 +272,7 @@ Logout
 
 </div>
 
-</aside>
+</div>
 
 </>
 
