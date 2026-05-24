@@ -14,8 +14,6 @@ Users,
 ClipboardList,
 BarChart2,
 Settings,
-ScrollText,
-Megaphone,
 LogOut,
 ChevronLeft,
 ChevronRight,
@@ -24,34 +22,11 @@ X
 } from 'lucide-react'
 
 import { useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import { cn } from '@/utils/helpers'
-
-const employeeNav=[
-{href:'/home',label:'Home',icon:Home},
-{href:'/bookings',label:'Book a Room',icon:Calendar},
-{href:'/my-bookings',label:'My Bookings',icon:BookOpen},
-{href:'/notifications',label:'Notifications',icon:Bell},
-{href:'/account',label:'My Account',icon:User},
-]
-
-const adminNav=[
-{href:'/admin/dashboard',label:'Dashboard',icon:LayoutDashboard},
-{href:'/admin/rooms',label:'Rooms',icon:DoorOpen},
-{href:'/admin/users',label:'Users',icon:Users},
-{href:'/admin/booking-management',label:'Bookings',icon:ClipboardList},
-{href:'/admin/reports',label:'Reports',icon:BarChart2},
-{href:'/admin/settings',label:'Settings',icon:Settings},
-{href:'/admin/audit',label:'Audit Logs',icon:ScrollText},
-{href:'/admin/announcements',label:'Announcements',icon:Megaphone},
-]
 
 export default function Sidebar(){
 
 const pathname=usePathname()
-
-const {user,isAdmin}=useAuth()
 
 const [collapsed,setCollapsed]=
 useState(false)
@@ -59,7 +34,7 @@ useState(false)
 const [mobileOpen,setMobileOpen]=
 useState(false)
 
-async function handleLogout(){
+async function logout(){
 
 await supabase.auth.signOut()
 
@@ -67,47 +42,75 @@ window.location.href='/login'
 
 }
 
-const NavItem=({
-href,
-label,
-icon:Icon
-}:any)=>{
+const navItems=[
 
-const active=
-pathname===href||
-(href!=='/home'&&pathname.startsWith(href))
+{
+href:'/home',
+label:'Home',
+icon:Home
+},
 
-return(
+{
+href:'/bookings',
+label:'Book a Room',
+icon:Calendar
+},
 
-<Link
-href={href}
-onClick={()=>
-setMobileOpen(false)
+{
+href:'/my-bookings',
+label:'My Bookings',
+icon:BookOpen
+},
+
+{
+href:'/notifications',
+label:'Notifications',
+icon:Bell
+},
+
+{
+href:'/account',
+label:'My Account',
+icon:User
+},
+
+{
+href:'/admin/dashboard',
+label:'Dashboard',
+icon:LayoutDashboard
+},
+
+{
+href:'/admin/rooms',
+label:'Rooms',
+icon:DoorOpen
+},
+
+{
+href:'/admin/users',
+label:'Users',
+icon:Users
+},
+
+{
+href:'/admin/booking-management',
+label:'Bookings',
+icon:ClipboardList
+},
+
+{
+href:'/admin/reports',
+label:'Reports',
+icon:BarChart2
+},
+
+{
+href:'/admin/settings',
+label:'Settings',
+icon:Settings
 }
-className={cn(
-'flex items-center gap-3 px-3 py-3 rounded-lg text-sm',
 
-active
-?
-'bg-blue-600 text-white'
-:
-'text-slate-400 hover:bg-[#1a2333]'
-)}
->
-
-<Icon size={18}/>
-
-{!collapsed&&(
-<span>
-{label}
-</span>
-)}
-
-</Link>
-
-)
-
-}
+]
 
 return(
 
@@ -120,24 +123,30 @@ setMobileOpen(
 )
 }
 className="
-lg:hidden
 fixed
 top-4
 left-4
 z-50
+lg:hidden
 bg-white
-p-2
 rounded-lg
 shadow
+p-2
 "
 >
 
 {
+
 mobileOpen
+
 ?
+
 <X size={20}/>
+
 :
+
 <Menu size={20}/>
+
 }
 
 </button>
@@ -150,11 +159,11 @@ onClick={()=>
 setMobileOpen(false)
 }
 className="
-lg:hidden
 fixed
 inset-0
 bg-black/50
 z-40
+lg:hidden
 "
 />
 
@@ -162,62 +171,76 @@ z-40
 
 
 <aside
-className={cn(
+className={`
 
-`
 fixed
-lg:static
-z-50
 top-0
 left-0
+z-50
 h-screen
-bg-[#0f1623]
-border-r
-border-[#1e2d3d]
+bg-[#0f172a]
+text-white
 transition-all
 duration-300
-`,
+
+${
 
 mobileOpen
 ?
 'translate-x-0'
 :
-'-translate-x-full lg:translate-x-0',
+'-translate-x-full lg:translate-x-0'
+
+}
+
+${
 
 collapsed
 ?
-'w-[70px]'
+'w-[80px]'
 :
-'w-[240px]'
-)}
+'w-[260px]'
+
+}
+
+`}
 >
 
-<div className="
-flex
-justify-between
-items-center
-p-5
+<div
+className="
+h-16
 border-b
-border-[#1e2d3d]
-">
+px-5
+flex
+items-center
+justify-between
+"
+>
 
-{!collapsed&&(
+{
+
+!collapsed&&(
 
 <div>
 
-<span className="
-text-white
+<span
+className="
 font-bold
-">
+text-white
+"
+>
 
 TTSGP
 
 </span>
 
-<span className="
+<span
+className="
 text-blue-400
 font-bold
-">
+ml-1
+"
+>
 
 Booking
 
@@ -225,7 +248,10 @@ Booking
 
 </div>
 
-)}
+)
+
+}
+
 
 <button
 onClick={()=>
@@ -236,16 +262,20 @@ setCollapsed(
 className="
 hidden
 lg:block
-text-white
 "
 >
 
 {
+
 collapsed
 ?
-<ChevronRight size={16}/>
+
+<ChevronRight size={18}/>
+
 :
-<ChevronLeft size={16}/>
+
+<ChevronLeft size={18}/>
+
 }
 
 </button>
@@ -253,65 +283,130 @@ collapsed
 </div>
 
 
-<nav className="
+
+<div
+className="
 p-3
 space-y-2
 overflow-y-auto
-">
+h-[calc(100vh-120px)]
+"
+>
 
-{employeeNav.map(item=>(
+{
 
-<NavItem
+navItems.map(item=>{
+
+const Icon=item.icon
+
+const active=
+
+pathname===item.href
+
+return(
+
+<Link
 key={item.href}
-{...item}
-/>
+href={item.href}
+onClick={()=>
+setMobileOpen(
+false
+)
+}
+className={`
 
-))}
+flex
+items-center
+gap-3
+px-3
+py-3
+rounded-lg
+text-sm
 
-{isAdmin&&
-adminNav.map(item=>(
+${
 
-<NavItem
-key={item.href}
-{...item}
-/>
+active
 
-))
+?
+
+'bg-blue-600'
+
+:
+
+'hover:bg-slate-800'
+
 }
 
-</nav>
+`}
+>
+
+<Icon size={18}/>
+
+{
+
+!collapsed&&(
+
+<span>
+
+{item.label}
+
+</span>
+
+)
+
+}
+
+</Link>
+
+)
+
+})
+
+}
+
+</div>
 
 
-<div className="
+
+<div
+className="
 absolute
-bottom-5
+bottom-4
 left-0
 right-0
 px-3
-">
+"
+>
 
 <button
-onClick={handleLogout}
+onClick={logout}
 className="
 w-full
 flex
 items-center
 gap-3
-text-slate-400
 px-3
 py-3
-hover:bg-[#1a2333]
 rounded-lg
+hover:bg-slate-800
 "
 >
 
 <LogOut size={18}/>
 
-{!collapsed&&(
+{
+
+!collapsed&&(
+
 <span>
+
 Logout
+
 </span>
-)}
+
+)
+
+}
 
 </button>
 
