@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+
 import {
 Menu,
 X,
@@ -20,81 +21,81 @@ Settings,
 LogOut
 } from 'lucide-react'
 
-const menuItems=[
-
-{
-name:'Home',
-icon:Home,
-href:'/home'
-},
-
-{
-name:'Book a Room',
-icon:Calendar,
-href:'/bookings'
-},
-
-{
-name:'My Bookings',
-icon:BookOpen,
-href:'/my-bookings'
-},
-
-{
-name:'Notifications',
-icon:Bell,
-href:'/notifications'
-},
-
-{
-name:'My Account',
-icon:User,
-href:'/my-account'
-},
-
-{
-name:'Dashboard',
-icon:LayoutDashboard,
-href:'/admin/dashboard'
-},
-
-{
-name:'Rooms',
-icon:DoorOpen,
-href:'/admin/rooms'
-},
-
-{
-name:'Users',
-icon:Users,
-href:'/admin/users'
-},
-
-{
-name:'Bookings',
-icon:ClipboardList,
-href:'/admin/booking-management'
-},
-
-{
-name:'Reports',
-icon:BarChart3,
-href:'/admin/reports'
-},
-
-{
-name:'Settings',
-icon:Settings,
-href:'/admin/settings'
-}
-
-]
-
 export default function Sidebar(){
 
 const pathname=usePathname()
 
 const [open,setOpen]=useState(false)
+
+const menuItems=[
+
+{
+name:'Home',
+href:'/home',
+icon:Home
+},
+
+{
+name:'Book a Room',
+href:'/bookings',
+icon:Calendar
+},
+
+{
+name:'My Bookings',
+href:'/my-bookings',
+icon:BookOpen
+},
+
+{
+name:'Notifications',
+href:'/notifications',
+icon:Bell
+},
+
+{
+name:'My Account',
+href:'/my-account',
+icon:User
+},
+
+{
+name:'Dashboard',
+href:'/admin/dashboard',
+icon:LayoutDashboard
+},
+
+{
+name:'Rooms',
+href:'/admin/rooms',
+icon:DoorOpen
+},
+
+{
+name:'Users',
+href:'/admin/users',
+icon:Users
+},
+
+{
+name:'Bookings',
+href:'/admin/booking-management',
+icon:ClipboardList
+},
+
+{
+name:'Reports',
+href:'/admin/reports',
+icon:BarChart3
+},
+
+{
+name:'Settings',
+href:'/admin/settings',
+icon:Settings
+}
+
+]
 
 return(
 
@@ -105,16 +106,18 @@ onClick={()=>setOpen(true)}
 className="
 lg:hidden
 fixed
-top-5
+top-4
 left-4
-z-50
+z-[60]
 bg-white
-p-2
+shadow-md
 rounded-lg
-shadow
+p-2
 "
 >
-<Menu size={22}/>
+
+<Menu size={20}/>
+
 </button>
 
 
@@ -125,7 +128,7 @@ onClick={()=>setOpen(false)}
 className="
 fixed
 inset-0
-bg-black/40
+bg-black/50
 z-40
 lg:hidden
 "
@@ -134,32 +137,32 @@ lg:hidden
 )}
 
 
-<div
+<aside
 className={`
 fixed
 top-0
 left-0
-h-full
+h-screen
 w-72
 bg-[#07152d]
 text-white
 z-50
-transform
 transition-transform
 duration-300
 
-${open?'translate-x-0':'-translate-x-full'}
+${open
+?'translate-x-0'
+:'-translate-x-full'
+}
 
 lg:translate-x-0
-lg:static
-lg:w-72
 `}
 >
 
 <div className="
 flex
-justify-between
 items-center
+justify-between
 p-6
 border-b
 border-slate-800
@@ -167,19 +170,20 @@ border-slate-800
 
 <h1 className="
 font-bold
-text-2xl
+text-3xl
 ">
 
-TTSGP Booking
+TTSGP
+<span className="text-blue-400">
+ Booking
+</span>
 
 </h1>
 
 
 <button
 onClick={()=>setOpen(false)}
-className="
-lg:hidden
-"
+className="lg:hidden"
 >
 
 <X/>
@@ -190,7 +194,13 @@ lg:hidden
 
 
 
-<div className="p-4 space-y-2">
+<div className="
+px-4
+py-6
+space-y-2
+overflow-y-auto
+h-[calc(100vh-130px)]
+">
 
 {menuItems.map(item=>{
 
@@ -212,6 +222,7 @@ gap-3
 px-4
 py-3
 rounded-xl
+transition
 
 ${active
 ?'bg-blue-600'
@@ -261,7 +272,7 @@ Logout
 
 </div>
 
-</div>
+</aside>
 
 </>
 
