@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname,useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import {
@@ -16,16 +16,24 @@ Users,
 ClipboardList,
 BarChart3,
 Megaphone,
+ShieldCheck,
+Settings,
 LogOut,
 Menu,
 X
 } from 'lucide-react'
 
+import { supabase } from '@/lib/supabase'
+
 export default function Sidebar(){
 
 const pathname=usePathname()
 
-const [open,setOpen]=useState(false)
+const router=useRouter()
+
+const [open,setOpen]=
+useState(false)
+
 
 const menu=[
 
@@ -93,15 +101,36 @@ href:'/admin/announcements'
 name:'Reports',
 icon:BarChart3,
 href:'/admin/reports'
+},
+
+{
+name:'Audit',
+icon:ShieldCheck,
+href:'/admin/audit'
+},
+
+{
+name:'Settings',
+icon:Settings,
+href:'/admin/settings'
 }
 
 ]
 
+
+async function logout(){
+
+await supabase.auth.signOut()
+
+router.push('/')
+
+}
+
+
+
 return(
 
 <>
-
-{/* Mobile menu button */}
 
 <button
 onClick={()=>setOpen(true)}
@@ -110,7 +139,7 @@ lg:hidden
 fixed
 top-4
 left-4
-z-50
+z-[60]
 bg-white
 p-2
 rounded-lg
@@ -123,12 +152,15 @@ shadow-md
 </button>
 
 
-{/* overlay */}
 
-{open&&(
+{
+
+open&&(
 
 <div
-onClick={()=>setOpen(false)}
+onClick={()=>
+setOpen(false)
+}
 className="
 fixed
 inset-0
@@ -138,11 +170,15 @@ lg:hidden
 "
 />
 
-)}
+)
+
+}
+
 
 
 <div
 className={`
+
 fixed
 top-0
 left-0
@@ -158,13 +194,14 @@ duration-300
 
 ${
 open
-?'translate-x-0'
-:'-translate-x-full lg:translate-x-0'
+?
+'translate-x-0'
+:
+'-translate-x-full lg:translate-x-0'
 }
+
 `}
 >
-
-{/* logo */}
 
 <div
 className="
@@ -187,16 +224,26 @@ text-3xl
 
 TTSGP
 
-<span className="text-blue-400">
+<span
+className="
+text-blue-400
+"
+>
+
 Booking
+
 </span>
 
 </h1>
 
 
 <button
-onClick={()=>setOpen(false)}
-className="lg:hidden"
+onClick={()=>
+setOpen(false)
+}
+className="
+lg:hidden
+"
 >
 
 <X/>
@@ -206,8 +253,6 @@ className="lg:hidden"
 </div>
 
 
-
-{/* menu */}
 
 <div
 className="
@@ -219,20 +264,29 @@ space-y-2
 "
 >
 
-{menu.map(item=>{
+{
 
-const Icon=item.icon
+menu.map(item=>{
+
+const Icon=
+item.icon
 
 const active=
-pathname===item.href
+
+pathname===
+item.href
+
 
 return(
 
 <Link
 key={item.href}
 href={item.href}
-onClick={()=>setOpen(false)}
+onClick={()=>
+setOpen(false)
+}
 className={`
+
 flex
 items-center
 gap-4
@@ -243,13 +297,18 @@ transition
 
 ${
 active
-?'bg-blue-600'
-:'hover:bg-white/10'
+?
+'bg-blue-600'
+:
+'hover:bg-white/10'
 }
+
 `}
 >
 
-<Icon size={22}/>
+<Icon
+size={22}
+/>
 
 <span>
 
@@ -261,13 +320,13 @@ active
 
 )
 
-})}
+})
+
+}
 
 </div>
 
 
-
-{/* bottom */}
 
 <div
 className="
@@ -278,11 +337,13 @@ p-5
 >
 
 <button
+onClick={logout}
 className="
 w-full
 flex
 items-center
 gap-3
+text-left
 hover:text-red-300
 "
 >
