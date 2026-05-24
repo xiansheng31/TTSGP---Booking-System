@@ -3,22 +3,12 @@
 import { useState,useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 
 export default function AccountPage(){
 
 const [user,setUser]=
 useState<any>(null)
-
-const [email,setEmail]=
-useState('')
-
-const [phone,setPhone]=
-useState('')
-
-const [saving,setSaving]=
-useState(false)
 
 
 
@@ -53,119 +43,14 @@ authUser.id
 )
 .single()
 
-
 console.log(data)
 console.log(error)
-
 
 if(data){
 
 setUser(data)
 
-setEmail(
-authUser.email || ''
-)
-
-setPhone(
-data.phone || ''
-)
-
 }
-
-}
-
-
-
-async function saveProfile(){
-
-setSaving(true)
-
-
-const {
-data:{
-user:authUser
-}
-}=await supabase
-.auth
-.getUser()
-
-
-if(!authUser){
-
-toast.error(
-'User not found'
-)
-
-setSaving(false)
-
-return
-
-}
-
-
-
-const {error:authError}=
-
-await supabase
-.auth
-.updateUser({
-
-email
-
-})
-
-
-if(authError){
-
-toast.error(
-authError.message
-)
-
-setSaving(false)
-
-return
-
-}
-
-
-
-const {error}=
-
-await supabase
-.from('users')
-.update({
-
-email,
-phone
-
-})
-.eq(
-'id',
-authUser.id
-)
-
-
-
-setSaving(false)
-
-
-
-if(error){
-
-toast.error(
-error.message
-)
-
-return
-
-}
-
-
-toast.success(
-'Profile updated'
-)
-
-loadProfile()
 
 }
 
@@ -276,7 +161,6 @@ justify-center
 text-white
 text-3xl
 font-bold
-shrink-0
 ">
 
 {
@@ -291,10 +175,7 @@ user.name
 </div>
 
 
-<div className="
-text-center
-sm:text-left
-">
+<div>
 
 <p className="
 font-semibold
@@ -308,17 +189,15 @@ text-lg
 <p className="
 text-sm
 text-slate-500
-break-all
 ">
 
-{email}
+{user.email}
 
 </p>
 
 <p className="
 text-xs
 text-slate-400
-mt-1
 capitalize
 ">
 
@@ -332,15 +211,11 @@ capitalize
 
 
 
-
 <div className="
 space-y-4
 ">
 
-<label className="
-text-sm
-font-medium
-">
+<label>
 
 Full Name
 
@@ -367,18 +242,13 @@ text-xs
 text-gray-400
 ">
 
-Managed by administrator
+Please contact administrator for changes
 
 </p>
 
 
 
-
-<label className="
-text-sm
-font-medium
-block
-">
+<label>
 
 Department
 
@@ -405,99 +275,75 @@ text-xs
 text-gray-400
 ">
 
-Managed by administrator
+Please contact administrator for changes
 
 </p>
 
 
 
-
-<label className="
-text-sm
-font-medium
-block
-">
+<label>
 
 Email
 
 </label>
 
 <input
-value={email}
-onChange={(e)=>
-
-setEmail(
-e.target.value
-)
-
+value={
+user.email || ''
 }
+disabled
 className="
 w-full
 border
 rounded-lg
 p-3
+bg-gray-100
+text-gray-500
+cursor-not-allowed
 "
 />
 
-
-
-
-<label className="
-text-sm
-font-medium
-block
+<p className="
+text-xs
+text-gray-400
 ">
 
-Phone
+Please contact administrator for changes
+
+</p>
+
+
+
+<label>
+
+Phone Number
 
 </label>
 
 <input
-value={phone}
-onChange={(e)=>
-
-setPhone(
-e.target.value
-)
-
+value={
+user.phone || ''
 }
+disabled
 className="
 w-full
 border
 rounded-lg
 p-3
+bg-gray-100
+text-gray-500
+cursor-not-allowed
 "
 />
 
+<p className="
+text-xs
+text-gray-400
+">
 
+Please contact administrator for changes
 
-
-<button
-onClick={
-saveProfile
-}
-className="
-w-full
-sm:w-auto
-bg-blue-600
-text-white
-px-6
-py-3
-rounded-xl
-hover:bg-blue-700
-mt-5
-"
->
-
-{
-saving
-?
-'Saving...'
-:
-'Save Profile'
-}
-
-</button>
+</p>
 
 </div>
 
@@ -527,7 +373,7 @@ Account Security
 bg-yellow-50
 border
 border-yellow-200
-rounded-xl
+rounded-lg
 p-4
 text-sm
 text-yellow-700
