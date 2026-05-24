@@ -10,19 +10,17 @@ import type { Notification } from '@/types'
 
 export default function NotificationsPage(){
 
-const user={
-
-id:'1',
-name:'Xian Sheng'
-
-}
-
 const [
 notifications,
 setNotifications
 ]=useState<
 Notification[]
 >([])
+
+const [
+loading,
+setLoading
+]=useState(true)
 
 
 useEffect(()=>{
@@ -32,9 +30,25 @@ loadNotifications()
 },[])
 
 
+
 async function loadNotifications(){
 
-const {data}=await supabase
+const {
+data:{user}
+}=await supabase
+.auth
+.getUser()
+
+if(!user){
+
+setLoading(false)
+
+return
+
+}
+
+
+const {data,error}=await supabase
 .from(
 'notifications'
 )
@@ -50,9 +64,19 @@ ascending:false
 }
 )
 
+console.log(data)
+
+if(error){
+
+console.log(error)
+
+}
+
 setNotifications(
 data ?? []
 )
+
+setLoading(false)
 
 }
 
@@ -104,6 +128,15 @@ n
 
 
 async function markAllRead(){
+
+const {
+data:{user}
+}=await supabase
+.auth
+.getUser()
+
+if(!user)return
+
 
 await supabase
 .from(
@@ -228,8 +261,27 @@ Mark all read
 </div>
 
 
+{loading&&(
+
+<div className="
+bg-white
+rounded-xl
+p-10
+text-center
+">
+
+Loading...
+
+</div>
+
+)}
+
+
 
 {
+
+!loading &&
+
 notifications.length===0
 
 ?
