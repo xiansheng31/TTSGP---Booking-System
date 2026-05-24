@@ -82,6 +82,9 @@ new Date()
 .toISOString()
 .split('T')[0]
 
+const now=
+new Date()
+
 const {data:userData}=
 await supabase
 .auth
@@ -97,14 +100,31 @@ const {data}=await supabase
 'booking_date',
 today
 )
+.neq(
+'status',
+'cancelled'
+)
 
 if(data){
 
+const activeToday=
+data.filter(b=>{
+
+const bookingEnd=
+new Date(
+`${b.booking_date}T${b.end_time}`
+)
+
+return bookingEnd>now
+
+})
+
 setTodayCount(
-data.length
+activeToday.length
 )
 
 }
+
 
 
 const {data:upcoming}=await supabase
@@ -114,24 +134,34 @@ const {data:upcoming}=await supabase
 'user_id',
 userData.user.id
 )
-.gte(
-'booking_date',
-today
-)
 .neq(
 'status',
 'cancelled'
 )
 
+
 if(upcoming){
 
+const filteredUpcoming=
+upcoming.filter(b=>{
+
+const bookingEnd=
+new Date(
+`${b.booking_date}T${b.end_time}`
+)
+
+return bookingEnd>now
+
+})
+
 setMyUpcoming(
-upcoming
+filteredUpcoming
 )
 
 }
 
 }
+
 
 
 async function loadAnnouncements(){
