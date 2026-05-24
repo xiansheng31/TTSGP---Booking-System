@@ -1,53 +1,181 @@
 'use client'
 
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import toast from 'react-hot-toast'
+import { supabase } from '@/lib/supabase'
 
 export default function AccountPage(){
 
-const user={
-
-id:'1',
-name:'Xian Sheng',
-email:'xiansheng@gmail.com',
-employee_id:'TTSGP001',
-role:'admin',
-department:'IT',
-phone:'0123456789'
-
-}
+const [user,setUser]=
+useState<any>(null)
 
 const [email,setEmail]=
-useState(
-user.email
-)
+useState('')
 
 const [phone,setPhone]=
-useState(
-user.phone
-)
+useState('')
 
 const [saving,setSaving]=
 useState(false)
+
+
+
+useEffect(()=>{
+
+loadProfile()
+
+},[])
+
+
+
+async function loadProfile(){
+
+const {
+data:{
+user:authUser
+}
+}=await supabase
+.auth
+.getUser()
+
+if(!authUser)return
+
+
+const {data,error}=await supabase
+.from('users')
+.select('*')
+.eq(
+'id',
+authUser.id
+)
+.single()
+
+console.log(data)
+console.log(error)
+
+if(data){
+
+setUser(data)
+
+setEmail(
+data.email || ''
+)
+
+setPhone(
+data.phone || ''
+)
+
+}
+
+}
+
 
 
 async function saveProfile(){
 
 setSaving(true)
 
-setTimeout(()=>{
+
+const {
+data:{
+user:authUser
+}
+}=await supabase
+.auth
+.getUser()
+
+
+if(!authUser){
+
+toast.error(
+'User not found'
+)
+
+setSaving(false)
+
+return
+
+}
+
+
+const {error}=await supabase
+.from('users')
+.update({
+
+email,
+phone
+
+})
+.eq(
+'id',
+authUser.id
+)
+
+
+setSaving(false)
+
+
+if(error){
+
+toast.error(
+error.message
+)
+
+return
+
+}
+
 
 toast.success(
 'Profile updated'
 )
 
-setSaving(false)
-
-},1000)
+loadProfile()
 
 }
+
+
+
+if(!user){
+
+return(
+
+<div className="
+min-h-screen
+bg-slate-100
+">
+
+<Sidebar/>
+
+<div className="
+lg:ml-72
+min-h-screen
+flex
+flex-col
+">
+
+<Navbar
+title="My Account"
+/>
+
+<div className="
+p-6
+">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+
+)
+
+}
+
 
 
 return(
@@ -85,6 +213,7 @@ space-y-6
 ">
 
 
+
 <div className="
 bg-white
 rounded-2xl
@@ -117,7 +246,14 @@ font-bold
 shrink-0
 ">
 
-XS
+{
+user.name
+?.substring(
+0,
+2
+)
+.toUpperCase()
+}
 
 </div>
 
@@ -163,6 +299,7 @@ capitalize
 
 
 
+
 <div className="
 space-y-4
 ">
@@ -177,7 +314,9 @@ Full Name
 </label>
 
 <input
-value={user.name}
+value={
+user.name || ''
+}
 disabled
 className="
 w-full
@@ -201,10 +340,10 @@ Managed by administrator
 
 
 
+
 <label className="
 text-sm
 font-medium
-mt-4
 block
 ">
 
@@ -213,7 +352,9 @@ Department
 </label>
 
 <input
-value={user.department}
+value={
+user.department || ''
+}
 disabled
 className="
 w-full
@@ -237,10 +378,10 @@ Managed by administrator
 
 
 
+
 <label className="
 text-sm
 font-medium
-mt-4
 block
 ">
 
@@ -267,10 +408,10 @@ p-3
 
 
 
+
 <label className="
 text-sm
 font-medium
-mt-4
 block
 ">
 
@@ -294,6 +435,7 @@ rounded-lg
 p-3
 "
 />
+
 
 
 
@@ -327,6 +469,7 @@ saving
 </div>
 
 </div>
+
 
 
 
