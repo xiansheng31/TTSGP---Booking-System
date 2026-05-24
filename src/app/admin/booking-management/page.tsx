@@ -1,23 +1,34 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect,useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
-import { Search, Check, X } from 'lucide-react'
+import {
+Search,
+Check,
+X
+} from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
-export default function BookingManagementPage() {
+export default function BookingManagementPage(){
 
-const [bookings,setBookings]=useState<any[]>([])
-const [search,setSearch]=useState('')
-const [statusFilter,setStatusFilter]=useState('')
+const [bookings,setBookings]=
+useState<any[]>([])
+
+const [search,setSearch]=
+useState('')
+
+const [statusFilter,setStatusFilter]=
+useState('')
+
 
 useEffect(()=>{
 
 loadBookings()
 
 },[])
+
 
 
 async function loadBookings(){
@@ -41,22 +52,7 @@ ascending:false
 }
 )
 
-console.log(
-'BOOKINGS:',
-data
-)
-
-console.log(
-'ERROR:',
-error
-)
-
 if(error){
-
-console.log(
-'BOOKING LOAD ERROR:',
-error
-)
 
 toast.error(
 error.message
@@ -75,29 +71,14 @@ return
 }
 
 
-const roomIds=data.map(
-b=>b.room_id
-)
-
-const userIds=data.map(
-b=>b.user_id
-)
-
-
 const {data:rooms}=await supabase
 .from('rooms')
-.select(`
-id,
-name
-`)
+.select('id,name')
 
 
 const {data:users}=await supabase
 .from('users')
-.select(`
-id,
-name
-`)
+.select('id,name')
 
 
 const merged=data.map(
@@ -108,13 +89,15 @@ booking=>({
 
 rooms:
 rooms?.find(
-r=>r.id===booking.room_id
-) || null,
+r=>
+r.id===booking.room_id
+),
 
 users:
 users?.find(
-u=>u.id===booking.user_id
-) || null
+u=>
+u.id===booking.user_id
+)
 
 })
 
@@ -162,13 +145,16 @@ loadBookings()
 }
 
 
-const filtered=bookings.filter(
 
-(b)=>{
+const filtered=
+
+bookings.filter(
+
+b=>{
 
 const matchSearch=
 
-((b.users?.name || '')
+((b.users?.name||'')
 .toLowerCase()
 .includes(
 search.toLowerCase()
@@ -176,7 +162,7 @@ search.toLowerCase()
 
 ||
 
-((b.rooms?.name || '')
+((b.rooms?.name||'')
 .toLowerCase()
 .includes(
 search.toLowerCase()
@@ -184,7 +170,7 @@ search.toLowerCase()
 
 ||
 
-((b.title || '')
+((b.title||'')
 .toLowerCase()
 .includes(
 search.toLowerCase()
@@ -194,8 +180,11 @@ search.toLowerCase()
 const matchStatus=
 
 !statusFilter
+
 ||
-b.status===statusFilter
+
+b.status===
+statusFilter
 
 
 return(
@@ -212,31 +201,39 @@ matchStatus
 
 return(
 
-<div className="flex h-screen overflow-hidden">
+<div className="
+min-h-screen
+bg-slate-100
+">
 
 <Sidebar/>
 
 <div className="
-flex-1
+lg:ml-72
+min-h-screen
 flex
 flex-col
-overflow-hidden
 ">
 
 <Navbar
-title="Booking Management"
+title="
+Booking Management
+"
 />
+
 
 <main className="
 flex-1
-overflow-y-auto
-p-6
+p-4
+md:p-6
 space-y-5
+overflow-x-hidden
 ">
 
 <div className="
 flex
-items-center
+flex-col
+md:flex-row
 gap-3
 ">
 
@@ -250,7 +247,7 @@ size={16}
 className="
 absolute
 left-3
-top-3
+top-3.5
 text-slate-400
 "
 />
@@ -269,13 +266,15 @@ className="
 w-full
 pl-10
 pr-4
-py-2
+py-3
 border
-rounded-lg
+rounded-xl
+bg-white
 "
 />
 
 </div>
+
 
 
 <select
@@ -287,9 +286,10 @@ e.target.value
 }
 className="
 border
-rounded-lg
+rounded-xl
 px-4
-py-2
+py-3
+bg-white
 "
 >
 
@@ -323,14 +323,19 @@ Completed
 bg-white
 rounded-xl
 border
-overflow-hidden
+overflow-x-auto
 ">
 
-<table className="w-full">
+<table className="
+min-w-[900px]
+w-full
+">
 
 <thead>
 
-<tr className="border-b">
+<tr className="
+border-b
+">
 
 <th className="p-4 text-left">
 USER
@@ -364,9 +369,12 @@ ACTION
 
 </thead>
 
+
 <tbody>
 
-{filtered.map((b)=>(
+{
+
+filtered.map((b)=>(
 
 <tr
 key={b.id}
@@ -376,15 +384,15 @@ border-b
 >
 
 <td className="p-4">
-{b.users?.name || '-'}
+{b.users?.name||'-'}
 </td>
 
 <td className="p-4">
-{b.rooms?.name || '-'}
+{b.rooms?.name||'-'}
 </td>
 
 <td className="p-4">
-{b.title || '-'}
+{b.title||'-'}
 </td>
 
 <td className="p-4">
@@ -404,6 +412,7 @@ bg-gray-100
 px-3
 py-1
 rounded-full
+capitalize
 ">
 
 {b.status}
@@ -414,11 +423,14 @@ rounded-full
 
 <td className="
 p-4
+">
+
+<div className="
 flex
 gap-2
 ">
 
-{b.status==='pending' && (
+{b.status==='pending'&&(
 
 <button
 onClick={()=>
@@ -461,18 +473,24 @@ rounded
 
 </button>
 
+</div>
+
 </td>
 
 </tr>
 
-))}
+))
+
+}
 
 </tbody>
 
 </table>
 
 
-{filtered.length===0 && (
+{
+
+filtered.length===0&&(
 
 <div className="
 p-10
@@ -484,7 +502,9 @@ No bookings found
 
 </div>
 
-)}
+)
+
+}
 
 </div>
 
