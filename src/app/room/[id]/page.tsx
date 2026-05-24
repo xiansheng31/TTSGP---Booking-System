@@ -158,7 +158,8 @@ description,
 booking_date:selectedDate,
 start_time:start,
 end_time:end,
-status:'pending'
+
+status:'approved'
 
 })
 
@@ -398,7 +399,6 @@ Select end time
 </option>
 
 {
-
 slots
 .filter(
 slot=>slot>start
@@ -415,7 +415,6 @@ value={slot}
 </option>
 
 ))
-
 }
 
 </select>
