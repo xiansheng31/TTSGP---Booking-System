@@ -30,6 +30,7 @@ const menuRef=
 useRef<HTMLDivElement>(null)
 
 
+
 useEffect(()=>{
 
 function handleClick(
@@ -77,36 +78,58 @@ loadUnread()
 
 async function loadUnread(){
 
-const {data:userData}=
-await supabase
+const {
+data:{user}
+}=await supabase
 .auth
 .getUser()
 
-if(!userData.user)return
+if(!user)return
 
 
-const {count}=await supabase
+const {
+data,
+error
+}=await supabase
 .from(
 'notifications'
 )
 .select(
-'*',
-{
-count:'exact',
-head:true
-}
-)
-.eq(
-'user_id',
-userData.user.id
-)
-.eq(
-'read',
-false
+'id,read,user_id'
 )
 
+
+console.log(
+'notifications:',
+data
+)
+
+
+if(error){
+
+console.log(
+error
+)
+
+return
+
+}
+
+
+const unread=
+data?.filter(
+
+n=>
+
+n.user_id===user.id
+&&
+n.read===false
+
+)||[]
+
+
 setUnreadCount(
-count || 0
+unread.length
 )
 
 }
@@ -195,8 +218,8 @@ className="
 absolute
 -top-1
 -right-1
-min-w-[14px]
-h-[14px]
+min-w-[16px]
+h-[16px]
 px-1
 bg-red-500
 rounded-full
@@ -205,15 +228,16 @@ text-[9px]
 flex
 items-center
 justify-center
+font-semibold
 "
 >
 
 {
-
 unreadCount>9
-?'9+'
-:unreadCount
-
+?
+'9+'
+:
+unreadCount
 }
 
 </div>
