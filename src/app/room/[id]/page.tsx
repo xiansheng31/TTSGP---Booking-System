@@ -100,17 +100,36 @@ const slots=[
 
 function isBooked(time:string){
 
-return bookings.some(
+return bookings.some(booking=>{
 
-booking=>
+if(
+booking.status==='cancelled'
+){
 
-time>=booking.start_time &&
+return false
 
-time<booking.end_time
+}
+
+const bookingStart=
+booking.start_time.slice(0,5)
+
+const bookingEnd=
+booking.end_time.slice(0,5)
+
+return(
+
+time>=bookingStart
+
+&&
+
+time<bookingEnd
 
 )
 
+})
+
 }
+
 
 
 async function confirmBooking(){
@@ -245,27 +264,19 @@ text-sm
 ">
 
 <p>
-Type:
-{' '}
-{room.type}
+Type: {room.type}
 </p>
 
 <p>
-Capacity:
-{' '}
-{room.capacity}
+Capacity: {room.capacity}
 </p>
 
 <p>
-Floor:
-{' '}
-{room.floor}
+Floor: {room.floor}
 </p>
 
 <p>
-Location:
-{' '}
-{room.location}
+Location: {room.location}
 </p>
 
 </div>
@@ -460,8 +471,7 @@ w-full
 p-3
 rounded-lg
 mb-4
-"
-/>
+"/>
 
 
 <textarea
@@ -479,8 +489,7 @@ h-28
 p-3
 rounded-lg
 mb-4
-"
-/>
+"/>
 
 
 <p>
@@ -504,11 +513,9 @@ Selected Start:
 </b>
 
 {' '}
-
 {start||'Not selected'}
 
 </p>
-
 
 <p>
 
@@ -517,7 +524,6 @@ Selected End:
 </b>
 
 {' '}
-
 {end||'Not selected'}
 
 </p>
