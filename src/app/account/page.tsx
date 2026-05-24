@@ -1,6 +1,6 @@
 'use client'
 
-import { useState,useEffect } from 'react'
+import { useEffect,useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
@@ -9,7 +9,6 @@ export default function AccountPage(){
 
 const [user,setUser]=
 useState<any>(null)
-
 
 
 useEffect(()=>{
@@ -30,7 +29,6 @@ user:authUser
 .auth
 .getUser()
 
-
 if(!authUser)return
 
 
@@ -43,8 +41,10 @@ authUser.id
 )
 .single()
 
+
 console.log(data)
 console.log(error)
+
 
 if(data){
 
@@ -105,7 +105,6 @@ bg-slate-100
 
 <Sidebar/>
 
-
 <div className="
 lg:ml-72
 min-h-screen
@@ -147,7 +146,7 @@ sm:flex-row
 items-center
 sm:items-start
 gap-4
-mb-6
+mb-8
 ">
 
 <div className="
@@ -161,6 +160,7 @@ justify-center
 text-white
 text-3xl
 font-bold
+shrink-0
 ">
 
 {
@@ -175,11 +175,14 @@ user.name
 </div>
 
 
-<div>
+<div className="
+text-center
+sm:text-left
+">
 
 <p className="
 font-semibold
-text-lg
+text-xl
 ">
 
 {user.name}
@@ -189,6 +192,7 @@ text-lg
 <p className="
 text-sm
 text-slate-500
+break-all
 ">
 
 {user.email}
@@ -199,6 +203,7 @@ text-slate-500
 text-xs
 text-slate-400
 capitalize
+mt-1
 ">
 
 {user.role}
@@ -212,10 +217,17 @@ capitalize
 
 
 <div className="
-space-y-4
+space-y-5
 ">
 
-<label>
+<div>
+
+<label className="
+text-sm
+font-medium
+mb-2
+block
+">
 
 Full Name
 
@@ -229,26 +241,26 @@ disabled
 className="
 w-full
 border
-rounded-lg
+rounded-xl
 p-3
-bg-gray-100
-text-gray-500
+bg-slate-50
+text-slate-500
 cursor-not-allowed
 "
 />
 
-<p className="
-text-xs
-text-gray-400
+</div>
+
+
+
+<div>
+
+<label className="
+text-sm
+font-medium
+mb-2
+block
 ">
-
-Please contact administrator for changes
-
-</p>
-
-
-
-<label>
 
 Department
 
@@ -262,26 +274,26 @@ disabled
 className="
 w-full
 border
-rounded-lg
+rounded-xl
 p-3
-bg-gray-100
-text-gray-500
+bg-slate-50
+text-slate-500
 cursor-not-allowed
 "
 />
 
-<p className="
-text-xs
-text-gray-400
+</div>
+
+
+
+<div>
+
+<label className="
+text-sm
+font-medium
+mb-2
+block
 ">
-
-Please contact administrator for changes
-
-</p>
-
-
-
-<label>
 
 Email
 
@@ -295,26 +307,26 @@ disabled
 className="
 w-full
 border
-rounded-lg
+rounded-xl
 p-3
-bg-gray-100
-text-gray-500
+bg-slate-50
+text-slate-500
 cursor-not-allowed
 "
 />
 
-<p className="
-text-xs
-text-gray-400
+</div>
+
+
+
+<div>
+
+<label className="
+text-sm
+font-medium
+mb-2
+block
 ">
-
-Please contact administrator for changes
-
-</p>
-
-
-
-<label>
 
 Phone Number
 
@@ -328,22 +340,39 @@ disabled
 className="
 w-full
 border
-rounded-lg
+rounded-xl
 p-3
-bg-gray-100
-text-gray-500
+bg-slate-50
+text-slate-500
 cursor-not-allowed
 "
 />
 
-<p className="
-text-xs
-text-gray-400
+</div>
+
+
+
+<div className="
+bg-blue-50
+border
+border-blue-100
+rounded-xl
+p-4
+mt-6
 ">
 
-Please contact administrator for changes
+<p className="
+text-sm
+text-blue-700
+">
+
+Profile information is managed by IT.
+
+Please contact IT if updates are required.
 
 </p>
+
+</div>
 
 </div>
 
@@ -373,19 +402,20 @@ Account Security
 bg-yellow-50
 border
 border-yellow-200
-rounded-lg
+rounded-xl
 p-4
 text-sm
 text-yellow-700
 ">
 
-Password updates are managed by administrators.
+Password updates are managed by IT.
 
 Please contact IT if changes are required.
 
 </div>
 
 </div>
+
 
 </div>
 
